@@ -73,6 +73,7 @@ const LoanSimulator: React.FC = () => {
                   value={loanData.interestRate}
                   onChange={(value) => handleInputChange("interestRate", value)}
                   symbol="%"
+                  step={0.05}
                 />
               </div>
 

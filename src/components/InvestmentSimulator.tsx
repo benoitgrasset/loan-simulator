@@ -120,6 +120,7 @@ const InvestmentSimulator: React.FC = () => {
                   value={investmentData.interestRate}
                   onChange={(value) => handleInputChange("interestRate", value)}
                   symbol="%"
+                  step={0.05}
                 />
               </div>
 
