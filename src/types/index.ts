@@ -10,6 +10,7 @@ export interface AmortizationRow {
   interestPayment: number;
   principalPayment: number;
   remainingBalance: number;
+  cumulativePayment: number;
 }
 
 export interface InvestmentData {
@@ -28,6 +29,7 @@ export interface InvestmentData {
 
 export interface InvestmentResult {
   monthlyNetCashFlow: number;
+  monthlyPayment: number;
   annualNetCashFlow: number;
   totalReturn: number;
   roi: number;

@@ -71,6 +71,7 @@ const AmortizationTable: React.FC<AmortizationTableProps> = ({ schedule }) => {
               <TableHeader align="right">Intérêts</TableHeader>
               <TableHeader align="right">Capital</TableHeader>
               <TableHeader align="right">Capital restant</TableHeader>
+              <TableHeader align="right">Somme remboursée</TableHeader>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -94,6 +95,9 @@ const AmortizationTable: React.FC<AmortizationTableProps> = ({ schedule }) => {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-medium">
                   {formatCurrency(row.remainingBalance)}
                 </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                  {formatCurrency(row.cumulativePayment)}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -110,6 +114,9 @@ const AmortizationTable: React.FC<AmortizationTableProps> = ({ schedule }) => {
               </td>
               <td className="px-6 py-4 text-sm font-bold text-green-600 text-right">
                 {formatCurrency(totalPrincipal)}
+              </td>
+              <td className="px-6 py-4 text-sm font-bold text-gray-900 text-right">
+                -
               </td>
               <td className="px-6 py-4 text-sm font-bold text-gray-900 text-right">
                 -

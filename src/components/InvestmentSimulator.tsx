@@ -1,5 +1,6 @@
 import { Building2, DollarSign, PieChart, TrendingUp } from "lucide-react";
 import React, { useMemo, useState } from "react";
+import { useFinancialStore } from "../stores/useFinancialStore";
 import { InvestmentData } from "../types";
 import {
   calculateInvestmentProfitability,
@@ -9,20 +10,35 @@ import {
 import { Input } from "./ui/input";
 import Label from "./ui/Label";
 
+const propertyPrice = 140000;
+
 const InvestmentSimulator: React.FC = () => {
+  const { duration, setDuration, interestRate, setInterestRate } =
+    useFinancialStore();
+
   const [investmentData, setInvestmentData] = useState<InvestmentData>({
-    propertyPrice: 400000,
-    loanAmount: 320000,
-    interestRate: 3.1,
-    duration: 20,
-    monthlyRent: 1800,
-    renovationCosts: 25000,
-    notaryFees: 8000,
-    loanFees: 2000,
-    cabinetCommission: 15000,
+    propertyPrice,
+    loanAmount: 130000,
+    interestRate,
+    duration,
+    monthlyRent: 490,
+    renovationCosts: (25 * propertyPrice) / 100,
+    notaryFees: 8500,
+    loanFees: 2500,
+    cabinetCommission: 1500,
     taxReduction: 12000,
     propertyTax: 2400,
   });
+
+  // Update investmentData when duration from store changes
+  React.useEffect(() => {
+    setInvestmentData((prev) => ({ ...prev, duration }));
+  }, [duration]);
+
+  // Update investmentData when interestRate from store changes
+  React.useEffect(() => {
+    setInvestmentData((prev) => ({ ...prev, interestRate }));
+  }, [interestRate]);
 
   const profitability = useMemo(
     () => calculateInvestmentProfitability(investmentData),
@@ -31,6 +47,12 @@ const InvestmentSimulator: React.FC = () => {
 
   const handleInputChange = (field: keyof InvestmentData, value: number) => {
     setInvestmentData((prev) => ({ ...prev, [field]: value }));
+    if (field === "duration") {
+      setDuration(value);
+    }
+    if (field === "interestRate") {
+      setInterestRate(value);
+    }
   };
 
   const initialInvestment =
@@ -172,7 +194,7 @@ const InvestmentSimulator: React.FC = () => {
               </div>
 
               <div>
-                <Label>Commission cabinet</Label>
+                <Label>Commission cabinet / Frais de courtage</Label>
                 <Input
                   value={investmentData.cabinetCommission}
                   onChange={(value) =>
@@ -268,46 +290,58 @@ const InvestmentSimulator: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <h4 className="font-medium text-gray-700 mb-3">
-                  Revenus annuels
+                  Revenus mensuels
                 </h4>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Loyers annuels</span>
+                    <span className="text-gray-600">Loyers mensuels</span>
                     <span className="font-medium">
-                      {formatCurrency(investmentData.monthlyRent * 12)}
+                      {formatCurrency(investmentData.monthlyRent)}
                     </span>
                   </div>
+                  {/* <div className="flex justify-between">
+                    <span className="text-gray-600">Réduction d'impôts</span>
+                    <span className="font-medium">
+                      {formatCurrency(investmentData.taxReduction / 12)}
+                    </span>
+                  </div> */}
                 </div>
+
+                {/* <div className="border-t pt-2 flex justify-between font-medium">
+                  <span>Total</span>
+                  <span>
+                    {formatCurrency(
+                      investmentData.monthlyRent -
+                        profitability.monthlyPayment -
+                        investmentData.propertyTax / 12
+                    )}
+                  </span>
+                </div> */}
               </div>
 
               <div>
                 <h4 className="font-medium text-gray-700 mb-3">
-                  Charges annuelles
+                  Charges mensuelles
                 </h4>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Mensualités emprunt</span>
                     <span className="font-medium">
-                      {formatCurrency(
-                        profitability.monthlyNetCashFlow +
-                          investmentData.propertyTax / 12 -
-                          investmentData.monthlyRent
-                      )}
+                      {formatCurrency(profitability.monthlyPayment)}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Taxe foncière</span>
                     <span className="font-medium">
-                      {formatCurrency(investmentData.propertyTax)}
+                      {formatCurrency(investmentData.propertyTax / 12)}
                     </span>
                   </div>
                   <div className="border-t pt-2 flex justify-between font-medium">
                     <span>Total charges</span>
                     <span>
                       {formatCurrency(
-                        (investmentData.monthlyRent -
-                          profitability.monthlyNetCashFlow) *
-                          12
+                        profitability.monthlyPayment +
+                          investmentData.propertyTax / 12
                       )}
                     </span>
                   </div>
@@ -320,6 +354,7 @@ const InvestmentSimulator: React.FC = () => {
                 </h4>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
+                    {/* prix du bien - montant emprunté */}
                     <span className="text-gray-600">Apport personnel</span>
                     <span className="font-medium">
                       {formatCurrency(

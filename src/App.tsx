@@ -2,6 +2,7 @@ import { Building2, Calculator } from "lucide-react";
 import { useState } from "react";
 import InvestmentSimulator from "./components/InvestmentSimulator";
 import LoanSimulator from "./components/LoanSimulator";
+import TabButton from "./components/ui/TabButton";
 
 function App() {
   const [activeTab, setActiveTab] = useState<"loan" | "investment">("loan");
@@ -19,28 +20,22 @@ function App() {
             </div>
 
             <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
-              <button
+              <TabButton
+                isActive={activeTab === "loan"}
                 onClick={() => setActiveTab("loan")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  activeTab === "loan"
-                    ? "bg-white text-blue-600 shadow-sm"
-                    : "text-gray-600 hover:text-gray-900"
-                }`}
+                icon={Calculator}
+                activeColor="blue"
               >
-                <Calculator className="w-4 h-4" />
                 Crédit Immobilier
-              </button>
-              <button
+              </TabButton>
+              <TabButton
+                isActive={activeTab === "investment"}
                 onClick={() => setActiveTab("investment")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  activeTab === "investment"
-                    ? "bg-white text-green-600 shadow-sm"
-                    : "text-gray-600 hover:text-gray-900"
-                }`}
+                icon={Building2}
+                activeColor="green"
               >
-                <Building2 className="w-4 h-4" />
                 Investissement De Normandie
-              </button>
+              </TabButton>
             </div>
           </div>
         </div>

@@ -1,5 +1,6 @@
-import { Calculator, DollarSign, TrendingUp } from "lucide-react";
+import { Calculator, EuroIcon, TrendingUp } from "lucide-react";
 import React, { useMemo, useState } from "react";
+import { useFinancialStore } from "../stores/useFinancialStore";
 import { LoanData } from "../types";
 import {
   formatCurrency,
@@ -11,11 +12,24 @@ import { Input } from "./ui/input";
 import Label from "./ui/Label";
 
 const LoanSimulator: React.FC = () => {
+  const { duration, setDuration, interestRate, setInterestRate } =
+    useFinancialStore();
+
   const [loanData, setLoanData] = useState<LoanData>({
     amount: 162500,
-    interestRate: 3.1,
-    duration: 20,
+    interestRate,
+    duration,
   });
+
+  // Update loanData when duration from store changes
+  React.useEffect(() => {
+    setLoanData((prev) => ({ ...prev, duration }));
+  }, [duration]);
+
+  // Update loanData when interestRate from store changes
+  React.useEffect(() => {
+    setLoanData((prev) => ({ ...prev, interestRate }));
+  }, [interestRate]);
 
   const amortizationSchedule = useMemo(
     () => generateAmortizationSchedule(loanData),
@@ -32,6 +46,12 @@ const LoanSimulator: React.FC = () => {
 
   const handleInputChange = (field: keyof LoanData, value: number) => {
     setLoanData((prev) => ({ ...prev, [field]: value }));
+    if (field === "duration") {
+      setDuration(value);
+    }
+    if (field === "interestRate") {
+      setInterestRate(value);
+    }
   };
 
   return (
@@ -94,7 +114,7 @@ const LoanSimulator: React.FC = () => {
             <div className="space-y-3">
               <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
                 <div className="flex items-center gap-2">
-                  <DollarSign className="w-5 h-5 text-blue-600" />
+                  <EuroIcon className="w-5 h-5 text-blue-600" />
                   <span className="text-sm font-medium text-gray-700">
                     Mensualité
                   </span>
