@@ -22,7 +22,7 @@ const LoanSimulator: React.FC = () => {
   });
 
   // Surface (m²) for the "Appartement" card
-  const [area, setArea] = useState<number>(40);
+  const [area, setArea] = useState<number>(45);
 
   // Apport (down payment)
   const [apport, setApport] = useState<number>(20000);
