@@ -16,7 +16,7 @@ const LoanSimulator: React.FC = () => {
     useFinancialStore();
 
   const [loanData, setLoanData] = useState<LoanData>({
-    amount: 162500,
+    amount: 220000,
     interestRate,
     duration,
   });
@@ -84,6 +84,7 @@ const LoanSimulator: React.FC = () => {
                   value={loanData.amount}
                   onChange={(value) => handleInputChange("amount", value)}
                   symbol="€"
+                  step="2000"
                 />
               </div>
 
