@@ -25,7 +25,7 @@ const LoanSimulator: React.FC = () => {
   const [area, setArea] = useState<number>(45);
 
   // Apport (down payment)
-  const [apport, setApport] = useState<number>(20000);
+  const [apport, setApport] = useState<number>(80000);
 
   // Update loanData when duration from store changes
   React.useEffect(() => {
