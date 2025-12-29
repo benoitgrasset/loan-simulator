@@ -24,6 +24,9 @@ const LoanSimulator: React.FC = () => {
   // Surface (m²) for the "Appartement" card
   const [area, setArea] = useState<number>(40);
 
+  // Apport (down payment)
+  const [apport, setApport] = useState<number>(20000);
+
   // Update loanData when duration from store changes
   React.useEffect(() => {
     setLoanData((prev) => ({ ...prev, duration }));
@@ -47,9 +50,11 @@ const LoanSimulator: React.FC = () => {
 
   const monthlyPayment = amortizationSchedule[0]?.monthlyPayment || 0;
 
+  const costTotal = useMemo(() => loanData.amount + apport, [loanData.amount, apport]);
+
   const pricePerSqm = useMemo(() => {
-    return area > 0 ? loanData.amount / area : 0;
-  }, [area, loanData.amount]);
+    return area > 0 ? costTotal / area : 0;
+  }, [area, costTotal]);
 
   const handleInputChange = (field: keyof LoanData, value: number) => {
     setLoanData((prev) => ({ ...prev, [field]: value }));
@@ -131,6 +136,25 @@ const LoanSimulator: React.FC = () => {
                   symbol="m²"
                   step={1}
                 />
+              </div>
+
+              <div>
+                <Label>Apport (€)</Label>
+                <Input
+                  value={apport}
+                  onChange={(value) => setApport(value)}
+                  symbol="€"
+                  step="2000"
+                />
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <span className="text-sm font-medium text-gray-700">
+                  Coût total
+                </span>
+                <span className="font-bold text-gray-700">
+                  {formatCurrency(costTotal)}
+                </span>
               </div>
 
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
