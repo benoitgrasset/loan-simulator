@@ -21,6 +21,9 @@ const LoanSimulator: React.FC = () => {
     duration,
   });
 
+  // Surface (m²) for the "Appartement" card
+  const [area, setArea] = useState<number>(40);
+
   // Update loanData when duration from store changes
   React.useEffect(() => {
     setLoanData((prev) => ({ ...prev, duration }));
@@ -43,6 +46,10 @@ const LoanSimulator: React.FC = () => {
   );
 
   const monthlyPayment = amortizationSchedule[0]?.monthlyPayment || 0;
+
+  const pricePerSqm = useMemo(() => {
+    return area > 0 ? loanData.amount / area : 0;
+  }, [area, loanData.amount]);
 
   const handleInputChange = (field: keyof LoanData, value: number) => {
     setLoanData((prev) => ({ ...prev, [field]: value }));
@@ -105,6 +112,34 @@ const LoanSimulator: React.FC = () => {
                   onChange={(value) => handleInputChange("duration", value)}
                   symbol="ans"
                 />
+              </div>
+            </div>
+          </div>
+
+          {/* Appartement card */}
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+              Appartement
+            </h2>
+
+            <div className="space-y-4">
+              <div>
+                <Label>Surface (m²)</Label>
+                <Input
+                  value={area}
+                  onChange={(value) => setArea(value)}
+                  symbol="m²"
+                  step={1}
+                />
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <span className="text-sm font-medium text-gray-700">
+                  Prix au m²
+                </span>
+                <span className="font-bold text-gray-700">
+                  {area > 0 ? `${formatCurrency(pricePerSqm)} /m²` : "—"}
+                </span>
               </div>
             </div>
           </div>
