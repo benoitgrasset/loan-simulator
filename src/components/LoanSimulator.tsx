@@ -11,6 +11,7 @@ import {
   DEFAULT_PROPERTY_VALUE,
   DEFAULT_WORKS,
   NOTARY_RATE,
+  PropertyType,
 } from "../constants";
 import { useFinancialStore } from "../stores/useFinancialStore";
 import { LoanData } from "../types";
@@ -23,6 +24,8 @@ import LoanChart from "./LoanChart";
 import { Input } from "./ui/Input";
 import { Label } from "./ui/Label";
 import { RadioButtonGroup } from "./ui/RadioGroup";
+
+const DEFAULT_PROPERTY_TYPE: PropertyType = "Neuf";
 
 const LoanSimulator = () => {
   const { duration, setDuration, interestRate, setInterestRate } =
@@ -39,7 +42,9 @@ const LoanSimulator = () => {
   const [propertyTax, setPropertyTax] = useState(DEFAULT_PROPERTY_TAX);
   const [edf, setEdf] = useState(DEFAULT_EDF);
   const [ptz, setPtz] = useState(0);
-  const [propertyType, setPropertyType] = useState("Neuf");
+  const [propertyType, setPropertyType] = useState<PropertyType>(
+    DEFAULT_PROPERTY_TYPE,
+  );
   const [projectCosts, setProjectCosts] = useState({
     works: DEFAULT_WORKS,
     guaranteeFees: DEFAULT_GUARANTEE_FEES,
@@ -56,27 +61,33 @@ const LoanSimulator = () => {
     setLoanData((prev) => ({ ...prev, interestRate }));
   }, [interestRate]);
 
+  // Calcul du montant à emprunter
   const loanAmount = propertyValue - downPayment;
+  // Calcul du tableau d'amortissement
   const amortizationSchedule = useMemo(
     () => generateAmortizationSchedule({ ...loanData, amount: loanAmount }),
     [loanData, loanAmount],
   );
 
+  // Calcul du total des intérêts
   const totalInterest = useMemo(
     () =>
       amortizationSchedule.reduce((sum, row) => sum + row.interestPayment, 0),
     [amortizationSchedule],
   );
 
+  // Calcul des mensualités
   const monthlyPayment = amortizationSchedule[0]?.monthlyPayment || 0;
   const monthlyPropertyTax = propertyTax / 12;
   const totalMonthlyCost =
     monthlyPayment + monthlyPropertyTax + monthlyCharges + edf;
 
+  // Calcul des frais
   const notaryRate = NOTARY_RATE[propertyType];
   const brokerFees = BROKER_FEES[propertyType];
   const notaryFees = (propertyValue * notaryRate) / 100;
 
+  // Calcul du total des frais
   const totalFees =
     Object.values(projectCosts).reduce((total, cost) => total + cost, 0) +
     notaryFees +
@@ -129,7 +140,7 @@ const LoanSimulator = () => {
           name="propertyType"
           options={["Neuf", "Ancien"]}
           value={propertyType}
-          onChange={(value) => setPropertyType(value)}
+          onChange={(value) => setPropertyType(value as PropertyType)}
         />
       </div>
 
@@ -211,7 +222,7 @@ const LoanSimulator = () => {
                   value={ptz}
                   onChange={(value) => setPtz(value)}
                   symbol="€"
-                  step={10000}
+                  step={5000}
                 />
               </div>
             </div>
@@ -278,7 +289,7 @@ const LoanSimulator = () => {
                   value={edf}
                   onChange={setEdf}
                   symbol="€/mois"
-                  step={50}
+                  step={25}
                 />
               </div>
 
