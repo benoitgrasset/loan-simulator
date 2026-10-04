@@ -1,11 +1,9 @@
-import React from "react";
-
-interface LabelProps {
+type Props = {
   children: React.ReactNode;
   htmlFor?: string;
-}
+};
 
-const Label: React.FC<LabelProps> = ({ children, htmlFor }) => {
+export const Label = ({ children, htmlFor }: Props) => {
   return (
     <label
       htmlFor={htmlFor}
@@ -15,5 +13,3 @@ const Label: React.FC<LabelProps> = ({ children, htmlFor }) => {
     </label>
   );
 };
-
-export default Label;

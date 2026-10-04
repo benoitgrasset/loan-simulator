@@ -1,14 +1,14 @@
 import { ChevronLeft, ChevronRight, Eye, EyeOff } from "lucide-react";
-import React, { useState } from "react";
+import { useState } from "react";
 import { AmortizationRow } from "../types";
 import { formatCurrency } from "../utils/calculations";
 import TableHeader from "./ui/TableHeader";
 
-interface AmortizationTableProps {
+type Props = {
   schedule: AmortizationRow[];
-}
+};
 
-const AmortizationTable: React.FC<AmortizationTableProps> = ({ schedule }) => {
+const AmortizationTable = ({ schedule }: Props) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [showAllRows, setShowAllRows] = useState(false);
   const rowsPerPage = 12;
@@ -22,11 +22,11 @@ const AmortizationTable: React.FC<AmortizationTableProps> = ({ schedule }) => {
 
   const totalInterest = schedule.reduce(
     (sum, row) => sum + row.interestPayment,
-    0
+    0,
   );
   const totalPrincipal = schedule.reduce(
     (sum, row) => sum + row.principalPayment,
-    0
+    0,
   );
 
   const goToNextPage = () => {

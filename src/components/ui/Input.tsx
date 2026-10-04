@@ -10,7 +10,7 @@ export const Input = ({
   value,
   onChange,
   symbol,
-  step = 1,
+  step = 10,
   disabled = false,
 }: Props) => {
   return (

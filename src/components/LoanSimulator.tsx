@@ -1,14 +1,16 @@
 import { Calculator, EuroIcon, Home, TrendingUp } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import {
+  BROKER_FEES,
   DEFAULT_APPLICATION_FEES,
-  DEFAULT_BROKER_FEES,
   DEFAULT_DOWN_PAYMENT,
+  DEFAULT_EDF,
   DEFAULT_GUARANTEE_FEES,
   DEFAULT_MONTHLY_CHARGES,
-  DEFAULT_NOTARY_FEES,
   DEFAULT_PROPERTY_TAX,
   DEFAULT_PROPERTY_VALUE,
+  DEFAULT_WORKS,
+  NOTARY_RATE,
 } from "../constants";
 import { useFinancialStore } from "../stores/useFinancialStore";
 import { LoanData } from "../types";
@@ -18,10 +20,11 @@ import {
 } from "../utils/calculations";
 import AmortizationTable from "./AmortizationTable";
 import LoanChart from "./LoanChart";
-import { Input } from "./ui/input";
-import Label from "./ui/Label";
+import { Input } from "./ui/Input";
+import { Label } from "./ui/Label";
+import { RadioButtonGroup } from "./ui/RadioGroup";
 
-const LoanSimulator: React.FC = () => {
+const LoanSimulator = () => {
   const { duration, setDuration, interestRate, setInterestRate } =
     useFinancialStore();
 
@@ -34,11 +37,13 @@ const LoanSimulator: React.FC = () => {
   const [downPayment, setDownPayment] = useState(DEFAULT_DOWN_PAYMENT);
   const [monthlyCharges, setMonthlyCharges] = useState(DEFAULT_MONTHLY_CHARGES);
   const [propertyTax, setPropertyTax] = useState(DEFAULT_PROPERTY_TAX);
+  const [edf, setEdf] = useState(DEFAULT_EDF);
+  const [ptz, setPtz] = useState(0);
+  const [propertyType, setPropertyType] = useState("Neuf");
   const [projectCosts, setProjectCosts] = useState({
-    notaryFees: DEFAULT_NOTARY_FEES,
+    works: DEFAULT_WORKS,
     guaranteeFees: DEFAULT_GUARANTEE_FEES,
     applicationFees: DEFAULT_APPLICATION_FEES,
-    brokerFees: DEFAULT_BROKER_FEES,
   });
 
   // Update loanData when duration from store changes
@@ -65,11 +70,17 @@ const LoanSimulator: React.FC = () => {
 
   const monthlyPayment = amortizationSchedule[0]?.monthlyPayment || 0;
   const monthlyPropertyTax = propertyTax / 12;
-  const totalMonthlyCost = monthlyPayment + monthlyPropertyTax + monthlyCharges;
-  const totalFees = Object.values(projectCosts).reduce(
-    (total, cost) => total + cost,
-    0,
-  );
+  const totalMonthlyCost =
+    monthlyPayment + monthlyPropertyTax + monthlyCharges + edf;
+
+  const notaryRate = NOTARY_RATE[propertyType];
+  const brokerFees = BROKER_FEES[propertyType];
+  const notaryFees = (propertyValue * notaryRate) / 100;
+
+  const totalFees =
+    Object.values(projectCosts).reduce((total, cost) => total + cost, 0) +
+    notaryFees +
+    brokerFees;
   const totalProjectCost = propertyValue + totalFees;
 
   const handleInputChange = (field: keyof LoanData, value: number) => {
@@ -82,16 +93,8 @@ const LoanSimulator: React.FC = () => {
     }
   };
 
-  const handlePropertyValueChange = (value: number) => {
-    setPropertyValue(value);
-  };
-
-  const handleDownPaymentChange = (value: number) => {
-    setDownPayment(value);
-  };
-
-  const handleNotaryFeesChange = (value: number) => {
-    setProjectCosts((costs) => ({ ...costs, notaryFees: value }));
+  const handleWorksChange = (value: number) => {
+    setProjectCosts((costs) => ({ ...costs, works: value }));
   };
 
   const handleGuaranteeFeesChange = (value: number) => {
@@ -100,10 +103,6 @@ const LoanSimulator: React.FC = () => {
 
   const handleApplicationFeesChange = (value: number) => {
     setProjectCosts((costs) => ({ ...costs, applicationFees: value }));
-  };
-
-  const handleBrokerFeesChange = (value: number) => {
-    setProjectCosts((costs) => ({ ...costs, brokerFees: value }));
   };
 
   return (
@@ -121,6 +120,20 @@ const LoanSimulator: React.FC = () => {
         </p>
       </div>
 
+      {/* Switch neuf / ancien */}
+      <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">
+          Type de bien
+        </h2>
+        <RadioButtonGroup
+          name="propertyType"
+          options={["Neuf", "Ancien"]}
+          value={propertyType}
+          onChange={(value) => setPropertyType(value)}
+        />
+      </div>
+
+      {/* Valeur du bien et apport */}
       <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
         <h2 className="text-xl font-semibold text-gray-800 mb-4">
           Valeur du bien et apport
@@ -130,7 +143,7 @@ const LoanSimulator: React.FC = () => {
             <Label>Valeur du bien</Label>
             <Input
               value={propertyValue}
-              onChange={handlePropertyValueChange}
+              onChange={(value) => setPropertyValue(value)}
               symbol="€"
               step={1000}
             />
@@ -139,7 +152,7 @@ const LoanSimulator: React.FC = () => {
             <Label>Apport</Label>
             <Input
               value={downPayment}
-              onChange={handleDownPaymentChange}
+              onChange={(value) => setDownPayment(value)}
               symbol="€"
               step={1000}
             />
@@ -168,7 +181,7 @@ const LoanSimulator: React.FC = () => {
                 <Label>Montant à emprunter</Label>
                 <Input
                   value={loanAmount}
-                  onChange={() => {}}
+                  onChange={(value) => handleInputChange("amount", value)}
                   symbol="€"
                   disabled
                 />
@@ -190,6 +203,15 @@ const LoanSimulator: React.FC = () => {
                   value={loanData.duration}
                   onChange={(value) => handleInputChange("duration", value)}
                   symbol="ans"
+                />
+              </div>
+              <div>
+                <Label>Montant PTZ</Label>
+                <Input
+                  value={ptz}
+                  onChange={(value) => setPtz(value)}
+                  symbol="€"
+                  step={10000}
                 />
               </div>
             </div>
@@ -224,10 +246,10 @@ const LoanSimulator: React.FC = () => {
               </div>
 
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <span className="text-sm font-medium text-gray-700">
+                <span className="text-sm font-medium text-gray-500">
                   Montant total remboursé
                 </span>
-                <span className="font-bold text-gray-700">
+                <span className="font-bold text-gray-500">
                   {formatCurrency(loanAmount + totalInterest)}
                 </span>
               </div>
@@ -247,6 +269,16 @@ const LoanSimulator: React.FC = () => {
                   value={monthlyCharges}
                   onChange={setMonthlyCharges}
                   symbol="€/mois"
+                />
+              </div>
+
+              <div>
+                <Label>EDF</Label>
+                <Input
+                  value={edf}
+                  onChange={setEdf}
+                  symbol="€/mois"
+                  step={50}
                 />
               </div>
 
@@ -281,12 +313,18 @@ const LoanSimulator: React.FC = () => {
 
             <div className="space-y-4">
               <div>
-                <Label>Frais de notaire</Label>
+                <Label>Travaux</Label>
                 <Input
-                  value={projectCosts.notaryFees}
-                  onChange={handleNotaryFeesChange}
+                  value={projectCosts.works}
+                  onChange={handleWorksChange}
                   symbol="€"
+                  step={500}
                 />
+              </div>
+
+              <div>
+                <Label>Frais de notaire ({notaryRate}%)</Label>
+                <span>{formatCurrency(notaryFees)}</span>
               </div>
 
               <div>
@@ -295,6 +333,7 @@ const LoanSimulator: React.FC = () => {
                   value={projectCosts.guaranteeFees}
                   onChange={handleGuaranteeFeesChange}
                   symbol="€"
+                  step={500}
                 />
               </div>
 
@@ -304,16 +343,13 @@ const LoanSimulator: React.FC = () => {
                   value={projectCosts.applicationFees}
                   onChange={handleApplicationFeesChange}
                   symbol="€"
+                  step={500}
                 />
               </div>
 
               <div>
                 <Label>Frais de courtier</Label>
-                <Input
-                  value={projectCosts.brokerFees}
-                  onChange={handleBrokerFeesChange}
-                  symbol="€"
-                />
+                <span>{formatCurrency(brokerFees)}</span>
               </div>
 
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">

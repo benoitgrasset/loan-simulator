@@ -10,7 +10,6 @@ import {
   Tooltip,
   TooltipItem,
 } from "chart.js";
-import React from "react";
 import { Bar, Line } from "react-chartjs-2";
 import { AmortizationRow } from "../types";
 
@@ -22,14 +21,14 @@ ChartJS.register(
   BarElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
 );
 
-interface LoanChartProps {
+type Props = {
   schedule: AmortizationRow[];
-}
+};
 
-const LoanChart: React.FC<LoanChartProps> = ({ schedule }) => {
+const LoanChart = ({ schedule }: Props) => {
   // Données pour le graphique d'évolution du capital restant
   const remainingBalanceData = {
     labels: schedule.map((_, index) => `${index + 1}`),
@@ -75,7 +74,7 @@ const LoanChart: React.FC<LoanChartProps> = ({ schedule }) => {
       tooltip: {
         callbacks: {
           label: function (context: TooltipItem<"line" | "bar">) {
-            const value = context.parsed.y;
+            const value = context.parsed.y as number;
             return `${context.dataset.label}: ${new Intl.NumberFormat("fr-FR", {
               style: "currency",
               currency: "EUR",

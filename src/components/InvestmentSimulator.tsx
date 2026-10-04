@@ -7,12 +7,12 @@ import {
   formatCurrency,
   formatPercentage,
 } from "../utils/calculations";
-import { Input } from "./ui/input";
-import Label from "./ui/Label";
+import { Input } from "./ui/Input";
+import { Label } from "./ui/Label";
 
 const propertyPrice = 140000;
 
-const InvestmentSimulator: React.FC = () => {
+const InvestmentSimulator = () => {
   const { duration, setDuration, interestRate, setInterestRate } =
     useFinancialStore();
 
@@ -42,7 +42,7 @@ const InvestmentSimulator: React.FC = () => {
 
   const profitability = useMemo(
     () => calculateInvestmentProfitability(investmentData),
-    [investmentData]
+    [investmentData],
   );
 
   const handleInputChange = (field: keyof InvestmentData, value: number) => {
@@ -341,7 +341,7 @@ const InvestmentSimulator: React.FC = () => {
                     <span>
                       {formatCurrency(
                         profitability.monthlyPayment +
-                          investmentData.propertyTax / 12
+                          investmentData.propertyTax / 12,
                       )}
                     </span>
                   </div>
@@ -358,7 +358,8 @@ const InvestmentSimulator: React.FC = () => {
                     <span className="text-gray-600">Apport personnel</span>
                     <span className="font-medium">
                       {formatCurrency(
-                        investmentData.propertyPrice - investmentData.loanAmount
+                        investmentData.propertyPrice -
+                          investmentData.loanAmount,
                       )}
                     </span>
                   </div>
