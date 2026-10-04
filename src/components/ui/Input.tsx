@@ -1,6 +1,6 @@
 type Props = {
   value: number;
-  onChange: (value: number) => void;
+  onChange?: (value: number) => void;
   symbol: string;
   step?: string | number;
   disabled?: boolean;
@@ -20,7 +20,7 @@ export const Input = ({
         step={step}
         disabled={disabled}
         value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
+        onChange={(e) => onChange?.(Number(e.target.value))}
         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         placeholder="3.5"
       />

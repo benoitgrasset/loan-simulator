@@ -1,5 +1,4 @@
 export interface LoanData {
-  amount: number;
   interestRate: number;
   duration: number; // en années
 }

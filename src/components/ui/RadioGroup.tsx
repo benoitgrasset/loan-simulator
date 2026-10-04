@@ -1,11 +1,16 @@
-type RadioProps = {
+type RadioProps<T extends string> = {
   name: string;
-  value: string;
+  value: T;
   checked: boolean;
-  onChange: (value: string) => void;
+  onChange: (value: T) => void;
 };
 
-export const Radio = ({ name, value, checked, onChange }: RadioProps) => (
+export const Radio = <T extends string>({
+  name,
+  value,
+  checked,
+  onChange,
+}: RadioProps<T>) => (
   <label className="flex items-center gap-2 cursor-pointer">
     <input
       type="radio"
@@ -18,19 +23,19 @@ export const Radio = ({ name, value, checked, onChange }: RadioProps) => (
   </label>
 );
 
-type RadioButtonGroupProps = {
+type RadioButtonGroupProps<T extends string> = {
   name: string;
-  options: string[];
-  value: string;
-  onChange: (value: string) => void;
+  options: T[];
+  value: T;
+  onChange: (value: T) => void;
 };
 
-export const RadioButtonGroup = ({
+export const RadioButtonGroup = <T extends string>({
   name,
   options,
   value,
   onChange,
-}: RadioButtonGroupProps) => (
+}: RadioButtonGroupProps<T>) => (
   <div role="radiogroup" className="flex flex-col gap-3 w-fit">
     {options.map((option) => (
       <Radio

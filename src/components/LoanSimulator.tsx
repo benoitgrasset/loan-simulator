@@ -32,7 +32,6 @@ const LoanSimulator = () => {
     useFinancialStore();
 
   const [loanData, setLoanData] = useState<LoanData>({
-    amount: DEFAULT_PROPERTY_VALUE,
     interestRate,
     duration,
   });
@@ -61,12 +60,18 @@ const LoanSimulator = () => {
     setLoanData((prev) => ({ ...prev, interestRate }));
   }, [interestRate]);
 
-  // Calcul du montant à emprunter
-  const loanAmount = propertyValue - downPayment;
+  // Montant à financer (hors apport)
+  const amountToFinance = Math.max(propertyValue - downPayment, 0);
+  // Part couverte par le PTZ (plafonnée au montant à financer)
+  const ptzAmount = Math.min(amountToFinance, ptz);
+  // Reste à emprunter auprès de la banque
+  const loanAmount = amountToFinance - ptzAmount;
+
   // Calcul du tableau d'amortissement
   const amortizationSchedule = useMemo(
-    () => generateAmortizationSchedule({ ...loanData, amount: loanAmount }),
-    [loanData, loanAmount],
+    () =>
+      generateAmortizationSchedule({ ...loanData, amount: amountToFinance }),
+    [loanData, amountToFinance],
   );
 
   // Calcul du total des intérêts
@@ -140,7 +145,7 @@ const LoanSimulator = () => {
           name="propertyType"
           options={["Neuf", "Ancien"]}
           value={propertyType}
-          onChange={(value) => setPropertyType(value as PropertyType)}
+          onChange={(value) => setPropertyType(value)}
         />
       </div>
 
@@ -173,7 +178,7 @@ const LoanSimulator = () => {
               Montant à emprunter
             </span>
             <span className="font-bold text-blue-600">
-              {formatCurrency(loanAmount)}
+              {formatCurrency(amountToFinance)}
             </span>
           </div>
         </div>
@@ -190,12 +195,7 @@ const LoanSimulator = () => {
             <div className="space-y-4">
               <div>
                 <Label>Montant à emprunter</Label>
-                <Input
-                  value={loanAmount}
-                  onChange={(value) => handleInputChange("amount", value)}
-                  symbol="€"
-                  disabled
-                />
+                <Input value={loanAmount} symbol="€" disabled />
               </div>
 
               <div>
@@ -261,7 +261,7 @@ const LoanSimulator = () => {
                   Montant total remboursé
                 </span>
                 <span className="font-bold text-gray-500">
-                  {formatCurrency(loanAmount + totalInterest)}
+                  {formatCurrency(loanAmount + totalInterest + ptzAmount)}
                 </span>
               </div>
             </div>

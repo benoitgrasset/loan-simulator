@@ -8,7 +8,7 @@ import {
 export function calculateMonthlyPayment(
   amount: number,
   annualRate: number,
-  years: number
+  years: number,
 ): number {
   const monthlyRate = annualRate / 100 / 12;
   const numberOfPayments = years * 12;
@@ -21,14 +21,19 @@ export function calculateMonthlyPayment(
   );
 }
 
-export function generateAmortizationSchedule(
-  loanData: LoanData
-): AmortizationRow[] {
-  const { amount, interestRate, duration } = loanData;
+interface AmortizationData extends LoanData {
+  amount: number;
+}
+
+export function generateAmortizationSchedule({
+  amount,
+  interestRate,
+  duration,
+}: AmortizationData): AmortizationRow[] {
   const monthlyPayment = calculateMonthlyPayment(
     amount,
     interestRate,
-    duration
+    duration,
   );
   const monthlyRate = interestRate / 100 / 12;
   const numberOfPayments = duration * 12;
@@ -60,7 +65,7 @@ export function generateAmortizationSchedule(
 }
 
 export function calculateInvestmentProfitability(
-  data: InvestmentData
+  data: InvestmentData,
 ): InvestmentResult {
   const {
     propertyPrice,
@@ -80,7 +85,7 @@ export function calculateInvestmentProfitability(
   const monthlyPayment = calculateMonthlyPayment(
     loanAmount,
     interestRate,
-    duration
+    duration,
   );
 
   // Calcul du cash-flow mensuel net
