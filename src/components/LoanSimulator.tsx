@@ -1,5 +1,15 @@
-import { Calculator, EuroIcon, TrendingUp } from "lucide-react";
+import { Calculator, EuroIcon, Home, TrendingUp } from "lucide-react";
 import React, { useMemo, useState } from "react";
+import {
+  DEFAULT_APPLICATION_FEES,
+  DEFAULT_BROKER_FEES,
+  DEFAULT_DOWN_PAYMENT,
+  DEFAULT_GUARANTEE_FEES,
+  DEFAULT_MONTHLY_CHARGES,
+  DEFAULT_NOTARY_FEES,
+  DEFAULT_PROPERTY_TAX,
+  DEFAULT_PROPERTY_VALUE,
+} from "../constants";
 import { useFinancialStore } from "../stores/useFinancialStore";
 import { LoanData } from "../types";
 import {
@@ -16,9 +26,19 @@ const LoanSimulator: React.FC = () => {
     useFinancialStore();
 
   const [loanData, setLoanData] = useState<LoanData>({
-    amount: 162500,
+    amount: DEFAULT_PROPERTY_VALUE,
     interestRate,
     duration,
+  });
+  const [propertyValue, setPropertyValue] = useState(DEFAULT_PROPERTY_VALUE);
+  const [downPayment, setDownPayment] = useState(DEFAULT_DOWN_PAYMENT);
+  const [monthlyCharges, setMonthlyCharges] = useState(DEFAULT_MONTHLY_CHARGES);
+  const [propertyTax, setPropertyTax] = useState(DEFAULT_PROPERTY_TAX);
+  const [projectCosts, setProjectCosts] = useState({
+    notaryFees: DEFAULT_NOTARY_FEES,
+    guaranteeFees: DEFAULT_GUARANTEE_FEES,
+    applicationFees: DEFAULT_APPLICATION_FEES,
+    brokerFees: DEFAULT_BROKER_FEES,
   });
 
   // Update loanData when duration from store changes
@@ -31,18 +51,26 @@ const LoanSimulator: React.FC = () => {
     setLoanData((prev) => ({ ...prev, interestRate }));
   }, [interestRate]);
 
+  const loanAmount = propertyValue - downPayment;
   const amortizationSchedule = useMemo(
-    () => generateAmortizationSchedule(loanData),
-    [loanData]
+    () => generateAmortizationSchedule({ ...loanData, amount: loanAmount }),
+    [loanData, loanAmount],
   );
 
   const totalInterest = useMemo(
     () =>
       amortizationSchedule.reduce((sum, row) => sum + row.interestPayment, 0),
-    [amortizationSchedule]
+    [amortizationSchedule],
   );
 
   const monthlyPayment = amortizationSchedule[0]?.monthlyPayment || 0;
+  const monthlyPropertyTax = propertyTax / 12;
+  const totalMonthlyCost = monthlyPayment + monthlyPropertyTax + monthlyCharges;
+  const totalFees = Object.values(projectCosts).reduce(
+    (total, cost) => total + cost,
+    0,
+  );
+  const totalProjectCost = propertyValue + totalFees;
 
   const handleInputChange = (field: keyof LoanData, value: number) => {
     setLoanData((prev) => ({ ...prev, [field]: value }));
@@ -52,6 +80,30 @@ const LoanSimulator: React.FC = () => {
     if (field === "interestRate") {
       setInterestRate(value);
     }
+  };
+
+  const handlePropertyValueChange = (value: number) => {
+    setPropertyValue(value);
+  };
+
+  const handleDownPaymentChange = (value: number) => {
+    setDownPayment(value);
+  };
+
+  const handleNotaryFeesChange = (value: number) => {
+    setProjectCosts((costs) => ({ ...costs, notaryFees: value }));
+  };
+
+  const handleGuaranteeFeesChange = (value: number) => {
+    setProjectCosts((costs) => ({ ...costs, guaranteeFees: value }));
+  };
+
+  const handleApplicationFeesChange = (value: number) => {
+    setProjectCosts((costs) => ({ ...costs, applicationFees: value }));
+  };
+
+  const handleBrokerFeesChange = (value: number) => {
+    setProjectCosts((costs) => ({ ...costs, brokerFees: value }));
   };
 
   return (
@@ -69,6 +121,40 @@ const LoanSimulator: React.FC = () => {
         </p>
       </div>
 
+      <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">
+          Valeur du bien et apport
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="font-bold">
+            <Label>Valeur du bien</Label>
+            <Input
+              value={propertyValue}
+              onChange={handlePropertyValueChange}
+              symbol="€"
+              step={1000}
+            />
+          </div>
+          <div>
+            <Label>Apport</Label>
+            <Input
+              value={downPayment}
+              onChange={handleDownPaymentChange}
+              symbol="€"
+              step={1000}
+            />
+          </div>
+          <div className="md:col-span-1 flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+            <span className="text-sm font-medium text-gray-700">
+              Montant à emprunter
+            </span>
+            <span className="font-bold text-blue-600">
+              {formatCurrency(loanAmount)}
+            </span>
+          </div>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Formulaire de saisie */}
         <div className="lg:col-span-1 space-y-6">
@@ -81,9 +167,10 @@ const LoanSimulator: React.FC = () => {
               <div>
                 <Label>Montant à emprunter</Label>
                 <Input
-                  value={loanData.amount}
-                  onChange={(value) => handleInputChange("amount", value)}
+                  value={loanAmount}
+                  onChange={() => {}}
                   symbol="€"
+                  disabled
                 />
               </div>
 
@@ -141,7 +228,107 @@ const LoanSimulator: React.FC = () => {
                   Montant total remboursé
                 </span>
                 <span className="font-bold text-gray-700">
-                  {formatCurrency(loanData.amount + totalInterest)}
+                  {formatCurrency(loanAmount + totalInterest)}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Charges et mensualités */}
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+              Charges et mensualités
+            </h2>
+
+            <div className="space-y-4">
+              <div>
+                <Label>Charges mensuelles</Label>
+                <Input
+                  value={monthlyCharges}
+                  onChange={setMonthlyCharges}
+                  symbol="€/mois"
+                />
+              </div>
+
+              <div>
+                <Label>Taxe foncière annuelle</Label>
+                <Input
+                  value={propertyTax}
+                  onChange={setPropertyTax}
+                  symbol="€/an"
+                  step={50}
+                />
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-indigo-50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Home className="w-5 h-5 text-indigo-600" />
+                  <span className="text-sm font-medium text-gray-700">
+                    Mensualités totales
+                  </span>
+                </div>
+                <span className="font-bold text-indigo-600">
+                  {formatCurrency(totalMonthlyCost)}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+              Coût du projet
+            </h2>
+
+            <div className="space-y-4">
+              <div>
+                <Label>Frais de notaire</Label>
+                <Input
+                  value={projectCosts.notaryFees}
+                  onChange={handleNotaryFeesChange}
+                  symbol="€"
+                />
+              </div>
+
+              <div>
+                <Label>Frais de garantie</Label>
+                <Input
+                  value={projectCosts.guaranteeFees}
+                  onChange={handleGuaranteeFeesChange}
+                  symbol="€"
+                />
+              </div>
+
+              <div>
+                <Label>Frais de dossier</Label>
+                <Input
+                  value={projectCosts.applicationFees}
+                  onChange={handleApplicationFeesChange}
+                  symbol="€"
+                />
+              </div>
+
+              <div>
+                <Label>Frais de courtier</Label>
+                <Input
+                  value={projectCosts.brokerFees}
+                  onChange={handleBrokerFeesChange}
+                  symbol="€"
+                />
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <Label>Total des frais</Label>
+                <span className="text-gray-700">
+                  {formatCurrency(totalFees)}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                <span className="text-sm font-medium text-gray-700">
+                  Coût total du projet
+                </span>
+                <span className="font-bold text-blue-600">
+                  {formatCurrency(totalProjectCost)}
                 </span>
               </div>
             </div>

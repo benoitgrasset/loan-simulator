@@ -1,2 +1,12 @@
 export const DURATION = 25;
-export const DEFAULT_INTEREST_RATE = 3.1;
+export const DEFAULT_INTEREST_RATE = 3.8;
+export const DEFAULT_PROPERTY_VALUE = 462000;
+export const DEFAULT_DOWN_PAYMENT = 160000;
+export const DEFAULT_MONTHLY_CHARGES = 150;
+export const DEFAULT_PROPERTY_TAX = 1600;
+
+// Frais
+export const DEFAULT_NOTARY_FEES = 4620;
+export const DEFAULT_GUARANTEE_FEES = 2400;
+export const DEFAULT_APPLICATION_FEES = 1200;
+export const DEFAULT_BROKER_FEES = 2000;
