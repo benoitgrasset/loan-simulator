@@ -205,6 +205,7 @@ const LoanSimulator = () => {
                   value={loanData.duration}
                   onChange={(value) => handleInputChange("duration", value)}
                   symbol="ans"
+                  step={1}
                 />
               </div>
               <div>
