@@ -69,9 +69,8 @@ const LoanSimulator = () => {
 
   // Calcul du tableau d'amortissement
   const amortizationSchedule = useMemo(
-    () =>
-      generateAmortizationSchedule({ ...loanData, amount: amountToFinance }),
-    [loanData, amountToFinance],
+    () => generateAmortizationSchedule({ ...loanData, amount: loanAmount }),
+    [loanData, loanAmount],
   );
 
   // Calcul du total des intérêts
@@ -175,7 +174,7 @@ const LoanSimulator = () => {
           </div>
           <div className="md:col-span-1 flex items-center justify-between p-3 bg-blue-50 rounded-lg">
             <span className="text-sm font-medium text-gray-700">
-              Montant à emprunter
+              Montant à financer
             </span>
             <span className="font-bold text-blue-600">
               {formatCurrency(amountToFinance)}
