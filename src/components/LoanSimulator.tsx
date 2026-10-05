@@ -1,5 +1,5 @@
 import { Calculator, EuroIcon, Home, TrendingUp } from "lucide-react";
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   BROKER_FEES,
   DEFAULT_APPLICATION_FEES,
@@ -31,10 +31,7 @@ const LoanSimulator = () => {
   const { duration, setDuration, interestRate, setInterestRate } =
     useFinancialStore();
 
-  const [loanData, setLoanData] = useState<LoanData>({
-    interestRate,
-    duration,
-  });
+  const loanData = { interestRate, duration };
   const [propertyValue, setPropertyValue] = useState(DEFAULT_PROPERTY_VALUE);
   const [downPayment, setDownPayment] = useState(DEFAULT_DOWN_PAYMENT);
   const [monthlyCharges, setMonthlyCharges] = useState(DEFAULT_MONTHLY_CHARGES);
@@ -50,16 +47,6 @@ const LoanSimulator = () => {
     applicationFees: DEFAULT_APPLICATION_FEES,
   });
 
-  // Update loanData when duration from store changes
-  React.useEffect(() => {
-    setLoanData((prev) => ({ ...prev, duration }));
-  }, [duration]);
-
-  // Update loanData when interestRate from store changes
-  React.useEffect(() => {
-    setLoanData((prev) => ({ ...prev, interestRate }));
-  }, [interestRate]);
-
   // Montant à financer (hors apport)
   const amountToFinance = Math.max(propertyValue - downPayment, 0);
   // Part couverte par le PTZ (plafonnée au montant à financer)
@@ -69,8 +56,13 @@ const LoanSimulator = () => {
 
   // Calcul du tableau d'amortissement
   const amortizationSchedule = useMemo(
-    () => generateAmortizationSchedule({ ...loanData, amount: loanAmount }),
-    [loanData, loanAmount],
+    () =>
+      generateAmortizationSchedule({
+        interestRate,
+        duration,
+        amount: loanAmount,
+      }),
+    [interestRate, duration, loanAmount],
   );
 
   // Calcul du total des intérêts
@@ -99,7 +91,6 @@ const LoanSimulator = () => {
   const totalProjectCost = propertyValue + totalFees;
 
   const handleInputChange = (field: keyof LoanData, value: number) => {
-    setLoanData((prev) => ({ ...prev, [field]: value }));
     if (field === "duration") {
       setDuration(value);
     }
