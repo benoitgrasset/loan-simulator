@@ -12,11 +12,9 @@ export interface AmortizationRow {
   cumulativePayment: number;
 }
 
-export interface InvestmentData {
+export interface InvestmentFormData {
   propertyPrice: number;
   loanAmount: number;
-  interestRate: number;
-  duration: number;
   monthlyRent: number;
   renovationCosts: number;
   notaryFees: number;
@@ -25,6 +23,8 @@ export interface InvestmentData {
   taxReduction: number;
   propertyTax: number;
 }
+
+export interface InvestmentData extends InvestmentFormData, LoanData {}
 
 export interface InvestmentResult {
   monthlyNetCashFlow: number;

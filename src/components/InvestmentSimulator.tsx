@@ -1,7 +1,7 @@
 import { Building2, DollarSign, PieChart, TrendingUp } from "lucide-react";
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useFinancialStore } from "../stores/useFinancialStore";
-import { InvestmentData } from "../types";
+import { InvestmentData, InvestmentFormData } from "../types";
 import {
   calculateInvestmentProfitability,
   formatCurrency,
@@ -16,11 +16,9 @@ const InvestmentSimulator = () => {
   const { duration, setDuration, interestRate, setInterestRate } =
     useFinancialStore();
 
-  const [investmentData, setInvestmentData] = useState<InvestmentData>({
+  const [form, setForm] = useState<InvestmentFormData>({
     propertyPrice,
     loanAmount: 130000,
-    interestRate,
-    duration,
     monthlyRent: 490,
     renovationCosts: (25 * propertyPrice) / 100,
     notaryFees: 8500,
@@ -30,29 +28,28 @@ const InvestmentSimulator = () => {
     propertyTax: 2400,
   });
 
-  // Update investmentData when duration from store changes
-  React.useEffect(() => {
-    setInvestmentData((prev) => ({ ...prev, duration }));
-  }, [duration]);
-
-  // Update investmentData when interestRate from store changes
-  React.useEffect(() => {
-    setInvestmentData((prev) => ({ ...prev, interestRate }));
-  }, [interestRate]);
+  const investmentData = { ...form, interestRate, duration };
 
   const profitability = useMemo(
-    () => calculateInvestmentProfitability(investmentData),
-    [investmentData],
+    () =>
+      calculateInvestmentProfitability({
+        ...form,
+        interestRate,
+        duration,
+      }),
+    [form, interestRate, duration],
   );
 
   const handleInputChange = (field: keyof InvestmentData, value: number) => {
-    setInvestmentData((prev) => ({ ...prev, [field]: value }));
     if (field === "duration") {
       setDuration(value);
+      return;
     }
     if (field === "interestRate") {
       setInterestRate(value);
+      return;
     }
+    setForm((prev) => ({ ...prev, [field]: value }));
   };
 
   const initialInvestment =

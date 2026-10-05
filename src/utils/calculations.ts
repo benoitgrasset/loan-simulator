@@ -23,9 +23,11 @@ export function calculateMonthlyPayment(
 
 interface AmortizationData extends LoanData {
   amount: number;
+  /** Part empruntée à 0 %, remboursée sur la même durée. */
+  interestFreeAmount?: number;
 }
 
-export function generateAmortizationSchedule({
+function buildAmortizationSchedule({
   amount,
   interestRate,
   duration,
@@ -62,6 +64,39 @@ export function generateAmortizationSchedule({
   }
 
   return schedule;
+}
+
+export function generateAmortizationSchedule({
+  amount,
+  interestRate,
+  duration,
+  interestFreeAmount = 0,
+}: AmortizationData): AmortizationRow[] {
+  const interestBearing = buildAmortizationSchedule({
+    amount,
+    interestRate,
+    duration,
+  });
+
+  if (interestFreeAmount <= 0) return interestBearing;
+
+  const interestFree = buildAmortizationSchedule({
+    amount: interestFreeAmount,
+    interestRate: 0,
+    duration,
+  });
+
+  return interestBearing.map((row, index) => {
+    const freeRow = interestFree[index];
+    return {
+      month: row.month,
+      monthlyPayment: row.monthlyPayment + freeRow.monthlyPayment,
+      interestPayment: row.interestPayment,
+      principalPayment: row.principalPayment + freeRow.principalPayment,
+      remainingBalance: row.remainingBalance + freeRow.remainingBalance,
+      cumulativePayment: row.cumulativePayment + freeRow.cumulativePayment,
+    };
+  });
 }
 
 export function calculateInvestmentProfitability(

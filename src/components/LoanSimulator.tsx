@@ -47,22 +47,23 @@ const LoanSimulator = () => {
     applicationFees: DEFAULT_APPLICATION_FEES,
   });
 
-  // Montant à financer (hors apport)
+  // Montant à financer (hors apport), emprunté en totalité
   const amountToFinance = Math.max(propertyValue - downPayment, 0);
-  // Part couverte par le PTZ (plafonnée au montant à financer)
+  // Part empruntée à 0 % (PTZ), plafonnée au montant à financer
   const ptzAmount = Math.min(amountToFinance, ptz);
-  // Reste à emprunter auprès de la banque
+  // Part empruntée au taux du crédit
   const loanAmount = amountToFinance - ptzAmount;
 
-  // Calcul du tableau d'amortissement
+  // Le PTZ est remboursé sur la même durée, sans intérêts
   const amortizationSchedule = useMemo(
     () =>
       generateAmortizationSchedule({
         interestRate,
         duration,
         amount: loanAmount,
+        interestFreeAmount: ptzAmount,
       }),
-    [interestRate, duration, loanAmount],
+    [interestRate, duration, loanAmount, ptzAmount],
   );
 
   // Calcul du total des intérêts
@@ -184,7 +185,7 @@ const LoanSimulator = () => {
 
             <div className="space-y-4">
               <div>
-                <Label>Montant à emprunter</Label>
+                <Label>Montant à emprunter (hors PTZ)</Label>
                 <Input value={loanAmount} symbol="€" disabled />
               </div>
 
