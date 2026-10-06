@@ -1,5 +1,7 @@
 export interface LoanData {
+  /** Taux d'intérêt annuel */
   interestRate: number;
+  /** Durée de l'emprunt en années */
   duration: number; // en années
 }
 

@@ -14,7 +14,6 @@ import {
   PropertyType,
 } from "../constants";
 import { useFinancialStore } from "../stores/useFinancialStore";
-import { LoanData } from "../types";
 import {
   formatCurrency,
   generateAmortizationSchedule,
@@ -31,7 +30,6 @@ const LoanSimulator = () => {
   const { duration, setDuration, interestRate, setInterestRate } =
     useFinancialStore();
 
-  const loanData = { interestRate, duration };
   const [propertyValue, setPropertyValue] = useState(DEFAULT_PROPERTY_VALUE);
   const [downPayment, setDownPayment] = useState(DEFAULT_DOWN_PAYMENT);
   const [monthlyCharges, setMonthlyCharges] = useState(DEFAULT_MONTHLY_CHARGES);
@@ -41,11 +39,9 @@ const LoanSimulator = () => {
   const [propertyType, setPropertyType] = useState<PropertyType>(
     DEFAULT_PROPERTY_TYPE,
   );
-  const [projectCosts, setProjectCosts] = useState({
-    works: DEFAULT_WORKS,
-    guaranteeFees: DEFAULT_GUARANTEE_FEES,
-    applicationFees: DEFAULT_APPLICATION_FEES,
-  });
+  const [guaranteeFees, setGuaranteeFees] = useState(DEFAULT_GUARANTEE_FEES);
+  const [applicationFees, setApplicationFees] = useState(DEFAULT_APPLICATION_FEES);
+  const [works, setWorks] = useState(DEFAULT_WORKS);
 
   // Montant à financer (hors apport), emprunté en totalité
   const amountToFinance = Math.max(propertyValue - downPayment, 0);
@@ -86,31 +82,12 @@ const LoanSimulator = () => {
 
   // Calcul du total des frais
   const totalFees =
-    Object.values(projectCosts).reduce((total, cost) => total + cost, 0) +
+    works +
+    guaranteeFees +
+    applicationFees +
     notaryFees +
     brokerFees;
   const totalProjectCost = propertyValue + totalFees;
-
-  const handleInputChange = (field: keyof LoanData, value: number) => {
-    if (field === "duration") {
-      setDuration(value);
-    }
-    if (field === "interestRate") {
-      setInterestRate(value);
-    }
-  };
-
-  const handleWorksChange = (value: number) => {
-    setProjectCosts((costs) => ({ ...costs, works: value }));
-  };
-
-  const handleGuaranteeFeesChange = (value: number) => {
-    setProjectCosts((costs) => ({ ...costs, guaranteeFees: value }));
-  };
-
-  const handleApplicationFeesChange = (value: number) => {
-    setProjectCosts((costs) => ({ ...costs, applicationFees: value }));
-  };
 
   return (
     <div className="space-y-6">
@@ -192,8 +169,8 @@ const LoanSimulator = () => {
               <div>
                 <Label>Taux d'intérêt annuel</Label>
                 <Input
-                  value={loanData.interestRate}
-                  onChange={(value) => handleInputChange("interestRate", value)}
+                  value={interestRate}
+                  onChange={(value) => setInterestRate(value)}
                   symbol="%"
                   step={0.05}
                 />
@@ -202,8 +179,8 @@ const LoanSimulator = () => {
               <div>
                 <Label>Durée du prêt</Label>
                 <Input
-                  value={loanData.duration}
-                  onChange={(value) => handleInputChange("duration", value)}
+                  value={duration}
+                  onChange={(value) => setDuration(value)}
                   symbol="ans"
                   step={1}
                 />
@@ -222,7 +199,7 @@ const LoanSimulator = () => {
 
           {/* Résumé */}
           <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Résumé</h3>
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Résumé (Prêt + intérêts)</h3>
             <div className="space-y-3">
               <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
                 <div className="flex items-center gap-2">
@@ -318,23 +295,23 @@ const LoanSimulator = () => {
               <div>
                 <Label>Travaux</Label>
                 <Input
-                  value={projectCosts.works}
-                  onChange={handleWorksChange}
+                  value={works}
+                  onChange={(value) => setWorks(value)}
                   symbol="€"
                   step={500}
                 />
               </div>
 
               <div>
-                <Label>Frais de notaire ({notaryRate}%)</Label>
+                <Label>Frais de notaire ({notaryRate}% - {propertyType === "Neuf" ? "neuf" : "ancien"})</Label>
                 <span>{formatCurrency(notaryFees)}</span>
               </div>
 
               <div>
                 <Label>Frais de garantie</Label>
                 <Input
-                  value={projectCosts.guaranteeFees}
-                  onChange={handleGuaranteeFeesChange}
+                  value={guaranteeFees}
+                  onChange={(value) => setGuaranteeFees(value)}
                   symbol="€"
                   step={500}
                 />
@@ -343,15 +320,15 @@ const LoanSimulator = () => {
               <div>
                 <Label>Frais de dossier</Label>
                 <Input
-                  value={projectCosts.applicationFees}
-                  onChange={handleApplicationFeesChange}
+                  value={applicationFees}
+                  onChange={(value) => setApplicationFees(value)}
                   symbol="€"
                   step={500}
                 />
               </div>
 
               <div>
-                <Label>Frais de courtier</Label>
+                <Label>Frais de courtier ({propertyType === "Neuf" ? "neuf" : "ancien"})</Label>
                 <span>{formatCurrency(brokerFees)}</span>
               </div>
 
@@ -363,9 +340,12 @@ const LoanSimulator = () => {
               </div>
 
               <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <EuroIcon className="w-5 h-5 text-blue-600" />
                 <span className="text-sm font-medium text-gray-700">
                   Coût total du projet
                 </span>
+                </div>
                 <span className="font-bold text-blue-600">
                   {formatCurrency(totalProjectCost)}
                 </span>

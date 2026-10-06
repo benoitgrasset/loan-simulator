@@ -22,6 +22,7 @@ export function calculateMonthlyPayment(
 }
 
 interface AmortizationData extends LoanData {
+  /** Montant à financer (hors apport), emprunté en totalité (hors PTZ) */
   amount: number;
   /** Part empruntée à 0 %, remboursée sur la même durée. */
   interestFreeAmount?: number;
