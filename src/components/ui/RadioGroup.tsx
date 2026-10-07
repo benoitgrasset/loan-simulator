@@ -1,8 +1,11 @@
+import { cn } from "../../utils/tailwind";
+
 type RadioProps<T extends string> = {
   name: string;
   value: T;
   checked: boolean;
   onChange: (value: T) => void;
+  hint?: string;
 };
 
 export const Radio = <T extends string>({
@@ -10,24 +13,50 @@ export const Radio = <T extends string>({
   value,
   checked,
   onChange,
-}: RadioProps<T>) => (
-  <label className="flex items-center gap-2 cursor-pointer">
-    <input
-      type="radio"
-      name={name}
-      value={value}
-      checked={checked}
-      onChange={() => onChange(value)}
-    />
-    <span>{value}</span>
-  </label>
-);
+  hint,
+}: RadioProps<T>) => {
+  const hintId = `${name}-${value}-hint`;
+
+  return (
+    <div className="group/radio relative">
+      <label
+        className={cn(
+          "flex items-center justify-center cursor-pointer px-4 py-1.5 rounded-md text-sm font-medium transition-colors",
+          checked
+            ? "bg-white text-blue-600 shadow-sm"
+            : "text-gray-600 hover:text-gray-900",
+        )}
+      >
+        <input
+          type="radio"
+          name={name}
+          value={value}
+          checked={checked}
+          onChange={() => onChange(value)}
+          className="sr-only"
+          aria-describedby={hint ? hintId : undefined}
+        />
+        <span>{value}</span>
+      </label>
+      {hint ? (
+        <span
+          id={hintId}
+          role="tooltip"
+          className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 w-max max-w-xs -translate-x-1/2 rounded-lg bg-gray-900 px-3 py-2 text-left text-xs font-normal leading-5 text-white whitespace-pre-line opacity-0 shadow-lg transition-opacity group-hover/radio:opacity-100 group-focus-within/radio:opacity-100"
+        >
+          {hint}
+        </span>
+      ) : null}
+    </div>
+  );
+};
 
 type RadioButtonGroupProps<T extends string> = {
   name: string;
   options: T[];
   value: T;
   onChange: (value: T) => void;
+  hints?: Partial<Record<T, string>>;
 };
 
 export const RadioButtonGroup = <T extends string>({
@@ -35,8 +64,9 @@ export const RadioButtonGroup = <T extends string>({
   options,
   value,
   onChange,
+  hints,
 }: RadioButtonGroupProps<T>) => (
-  <div role="radiogroup" className="flex flex-col gap-3 w-fit">
+  <div role="radiogroup" className="inline-flex gap-1 bg-gray-100 p-1 rounded-lg">
     {options.map((option) => (
       <Radio
         key={option}
@@ -44,19 +74,8 @@ export const RadioButtonGroup = <T extends string>({
         value={option}
         checked={value === option}
         onChange={onChange}
+        hint={hints?.[option]}
       />
     ))}
   </div>
 );
-
-/* Usage
-
-const [etat, setEtat] = useState("neuf");
-
-<RadioButtonGroup
-  name="etat"
-  options={["neuf", "ancien"]}
-  value={etat}
-  onChange={setEtat}
-/>
-*/

@@ -1,4 +1,4 @@
-import { Calculator, EuroIcon, Home, TrendingUp } from "lucide-react";
+import { Calculator, EuroIcon, Home, Settings2, TrendingUp } from "lucide-react";
 import { useMemo, useState } from "react";
 import {
   BROKER_FEES,
@@ -20,6 +20,7 @@ import {
 } from "../utils/calculations";
 import AmortizationTable from "./AmortizationTable";
 import LoanChart from "./LoanChart";
+import { PropertyFeesSettings } from "./PropertyFeesSettings";
 import { Input } from "./ui/Input";
 import { Label } from "./ui/Label";
 import { RadioButtonGroup } from "./ui/RadioGroup";
@@ -42,6 +43,13 @@ const LoanSimulator = () => {
   const [guaranteeFees, setGuaranteeFees] = useState(DEFAULT_GUARANTEE_FEES);
   const [applicationFees, setApplicationFees] = useState(DEFAULT_APPLICATION_FEES);
   const [works, setWorks] = useState(DEFAULT_WORKS);
+  const [notaryRates, setNotaryRates] = useState<Record<PropertyType, number>>(
+    () => ({ ...NOTARY_RATE }),
+  );
+  const [brokerFeesByType, setBrokerFeesByType] = useState<
+    Record<PropertyType, number>
+  >(() => ({ ...BROKER_FEES }));
+  const [feesSettingsOpen, setFeesSettingsOpen] = useState(false);
 
   // Montant à financer (hors apport), emprunté en totalité
   const amountToFinance = Math.max(propertyValue - downPayment, 0);
@@ -76,8 +84,12 @@ const LoanSimulator = () => {
     monthlyPayment + monthlyPropertyTax + monthlyCharges + edf;
 
   // Calcul des frais
-  const notaryRate = NOTARY_RATE[propertyType];
-  const brokerFees = BROKER_FEES[propertyType];
+  const notaryRate = notaryRates[propertyType];
+  const brokerFees = brokerFeesByType[propertyType];
+  const propertyTypeHints: Record<PropertyType, string> = {
+    Neuf: `Frais de notaire : ${notaryRates.Neuf} %\nFrais de courtier : ${formatCurrency(brokerFeesByType.Neuf)}`,
+    Ancien: `Frais de notaire : ${notaryRates.Ancien} %\nFrais de courtier : ${formatCurrency(brokerFeesByType.Ancien)}`,
+  };
   const notaryFees = (propertyValue * notaryRate) / 100;
 
   // Calcul du total des frais
@@ -105,24 +117,46 @@ const LoanSimulator = () => {
       </div>
 
       {/* Switch neuf / ancien */}
-      <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">
-          Type de bien
-        </h2>
-        <RadioButtonGroup
-          name="propertyType"
-          options={["Neuf", "Ancien"]}
-          value={propertyType}
-          onChange={(value) => setPropertyType(value)}
+      <div className="relative z-10 bg-white rounded-xl shadow-lg px-4 py-3 border border-gray-100 flex flex-wrap items-center justify-between gap-3 w-1/2 overflow-visible">
+        <h2 className="text-base font-semibold text-gray-800">Type de bien</h2>
+        <div className="flex items-center gap-1">
+          <RadioButtonGroup
+            name="propertyType"
+            options={["Neuf", "Ancien"]}
+            value={propertyType}
+            onChange={(value) => setPropertyType(value)}
+            hints={propertyTypeHints}
+          />
+          <button
+            type="button"
+            onClick={() => setFeesSettingsOpen(true)}
+            className="rounded-md p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-800 cursor-pointer"
+            aria-label="Paramétrer les frais de notaire et de courtier"
+            title="Paramétrer les frais"
+          >
+            <Settings2 className="h-4 w-4" />
+          </button>
+        </div>
+        <PropertyFeesSettings
+          open={feesSettingsOpen}
+          onClose={() => setFeesSettingsOpen(false)}
+          notaryRates={notaryRates}
+          brokerFees={brokerFeesByType}
+          onNotaryRateChange={(type, value) =>
+            setNotaryRates((prev) => ({ ...prev, [type]: value }))
+          }
+          onBrokerFeesChange={(type, value) =>
+            setBrokerFeesByType((prev) => ({ ...prev, [type]: value }))
+          }
         />
       </div>
 
       {/* Valeur du bien et apport */}
-      <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">
+      <div className="bg-white rounded-xl shadow-lg p-4 border border-gray-100">
+        <h2 className="text-lg font-semibold text-gray-800 mb-3">
           Valeur du bien et apport
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div className="font-bold">
             <Label>Valeur du bien</Label>
             <Input
@@ -141,7 +175,7 @@ const LoanSimulator = () => {
               step={1000}
             />
           </div>
-          <div className="md:col-span-1 flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+          <div className="md:col-span-1 flex items-center justify-between px-3 py-2 bg-blue-50 rounded-lg">
             <span className="text-sm font-medium text-gray-700">
               Montant à financer
             </span>
@@ -304,7 +338,7 @@ const LoanSimulator = () => {
 
               <div>
                 <Label>Frais de notaire ({notaryRate}% - {propertyType === "Neuf" ? "neuf" : "ancien"})</Label>
-                <span>{formatCurrency(notaryFees)}</span>
+                <span className="inline-block px-4">{formatCurrency(notaryFees)}</span>
               </div>
 
               <div>
@@ -329,11 +363,11 @@ const LoanSimulator = () => {
 
               <div>
                 <Label>Frais de courtier ({propertyType === "Neuf" ? "neuf" : "ancien"})</Label>
-                <span>{formatCurrency(brokerFees)}</span>
+                <span className="inline-block px-4">{formatCurrency(brokerFees)}</span>
               </div>
 
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <Label>Total des frais</Label>
+                <Label className="mb-0">Total des frais</Label>
                 <span className="text-gray-700">
                   {formatCurrency(totalFees)}
                 </span>
