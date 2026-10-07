@@ -1,6 +1,7 @@
 import { LucideIcon } from "lucide-react";
 import React from "react";
 import { cn } from "../../utils/tailwind";
+import { Button } from "./Button";
 
 interface TabButtonProps {
   isActive: boolean;
@@ -20,18 +21,18 @@ const TabButton = ({
   const activeTextColor = `text-${activeColor}-600`;
 
   return (
-    <button
+    <Button
       onClick={onClick}
       className={cn(
-        "cursor-pointer flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors",
+        "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors",
         isActive
           ? `bg-white ${activeTextColor} shadow-sm`
-          : "text-gray-600 hover:text-gray-900"
+          : "text-gray-600 hover:text-gray-900",
       )}
     >
       <Icon className="w-4 h-4" />
       {children}
-    </button>
+    </Button>
   );
 };
 

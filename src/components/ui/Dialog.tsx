@@ -1,5 +1,6 @@
 import { X } from "lucide-react";
 import { useEffect } from "react";
+import { Button } from "./Button";
 
 type Props = {
   open: boolean;
@@ -24,10 +25,9 @@ export const Dialog = ({ open, title, onClose, children }: Props) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <button
-        type="button"
+      <Button
         aria-label="Fermer"
-        className="absolute inset-0 bg-black/40 cursor-pointer"
+        className="absolute inset-0 bg-black/40"
         onClick={onClose}
       />
       <div
@@ -40,14 +40,13 @@ export const Dialog = ({ open, title, onClose, children }: Props) => {
           <h3 id="dialog-title" className="text-base font-bold text-gray-800">
             {title}
           </h3>
-          <button
-            type="button"
+          <Button
             onClick={onClose}
-            className="rounded-md p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-800 cursor-pointer"
+            className="rounded-md p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-800"
             aria-label="Fermer"
           >
             <X className="h-5 w-5" />
-          </button>
+          </Button>
         </div>
         {children}
       </div>
