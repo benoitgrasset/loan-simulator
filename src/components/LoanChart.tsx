@@ -2,16 +2,19 @@ import {
   BarElement,
   CategoryScale,
   Chart as ChartJS,
+  Filler,
   Legend,
   LinearScale,
   LineElement,
   PointElement,
-  Title,
+  ScriptableContext,
   Tooltip,
   TooltipItem,
 } from "chart.js";
+import { useMemo } from "react";
 import { Bar, Line } from "react-chartjs-2";
 import { AmortizationRow } from "../types";
+import { formatCurrency } from "../utils/calculations";
 
 ChartJS.register(
   CategoryScale,
@@ -19,7 +22,7 @@ ChartJS.register(
   PointElement,
   LineElement,
   BarElement,
-  Title,
+  Filler,
   Tooltip,
   Legend,
 );
@@ -28,72 +31,202 @@ type Props = {
   schedule: AmortizationRow[];
 };
 
+const BLUE = "#2563eb";
+const EMERALD = "#059669";
+const ROSE = "#e11d48";
+const RED = "rgba(225, 29, 72, 0.82)";
+const GREEN = "rgba(5, 150, 105, 0.88)";
+
+const formatAxisEuro = (value: number) => {
+  if (Math.abs(value) >= 1_000_000) {
+    return `${(value / 1_000_000).toLocaleString("fr-FR", {
+      maximumFractionDigits: 1,
+    })} M€`;
+  }
+  if (Math.abs(value) >= 1000) {
+    return `${Math.round(value / 1000).toLocaleString("fr-FR")} k€`;
+  }
+  return `${Math.round(value)} €`;
+};
+
+const createAreaGradient = (context: ScriptableContext<"line">) => {
+  const { ctx, chartArea } = context.chart;
+  if (!chartArea) return "rgba(37, 99, 235, 0.12)";
+
+  const gradient = ctx.createLinearGradient(
+    0,
+    chartArea.top,
+    0,
+    chartArea.bottom,
+  );
+  gradient.addColorStop(0, "rgba(37, 99, 235, 0.38)");
+  gradient.addColorStop(0.55, "rgba(37, 99, 235, 0.12)");
+  gradient.addColorStop(1, "rgba(37, 99, 235, 0)");
+  return gradient;
+};
+
 const LoanChart = ({ schedule }: Props) => {
-  // Données pour le graphique d'évolution du capital restant
-  const remainingBalanceData = {
-    labels: schedule.map((_, index) => `${index + 1}`),
-    datasets: [
-      {
-        label: "Capital restant dû",
-        data: schedule.map((row) => row.remainingBalance),
-        borderColor: "rgb(59, 130, 246)",
-        backgroundColor: "rgba(59, 130, 246, 0.1)",
-        tension: 0.1,
-        fill: true,
-      },
-    ],
-  };
+  const remainingBalanceData = useMemo(
+    () => ({
+      labels: schedule.map((row) => row.month),
+      datasets: [
+        {
+          label: "Capital restant dû",
+          data: schedule.map((row) => row.remainingBalance),
+          borderColor: BLUE,
+          backgroundColor: createAreaGradient,
+          borderWidth: 2.5,
+          tension: 0.35,
+          fill: true,
+          pointRadius: 0,
+          pointHoverRadius: 5,
+          pointHoverBackgroundColor: BLUE,
+          pointHoverBorderColor: "#fff",
+          pointHoverBorderWidth: 2,
+        },
+      ],
+    }),
+    [schedule],
+  );
 
-  // Données pour le graphique des mensualités (capital vs intérêts)
-  const paymentsData = {
-    labels: schedule.map((_, index) => `M${index + 1}`), // Afficher seulement les 24 premiers mois
-    datasets: [
-      {
-        label: "Capital",
-        data: schedule.map((row) => row.principalPayment),
-        backgroundColor: "rgba(34, 197, 94, 0.8)",
-        borderColor: "rgb(34, 197, 94)",
-        borderWidth: 1,
-      },
-      {
-        label: "Intérêts",
-        data: schedule.map((row) => row.interestPayment),
-        backgroundColor: "rgba(239, 68, 68, 0.8)",
-        borderColor: "rgb(239, 68, 68)",
-        borderWidth: 1,
-      },
-    ],
-  };
+  const yearlyPayments = useMemo(() => {
+    const years: { label: string; principal: number; interest: number }[] = [];
 
-  const chartOptions = {
+    schedule.forEach((row) => {
+      const yearIndex = Math.floor((row.month - 1) / 12);
+      if (!years[yearIndex]) {
+        years[yearIndex] = {
+          label: `An ${yearIndex + 1}`,
+          principal: 0,
+          interest: 0,
+        };
+      }
+      years[yearIndex].principal += row.principalPayment;
+      years[yearIndex].interest += row.interestPayment;
+    });
+
+    return years;
+  }, [schedule]);
+
+  const paymentsData = useMemo(
+    () => ({
+      labels: yearlyPayments.map((year) => year.label),
+      datasets: [
+        {
+          label: "Capital",
+          data: yearlyPayments.map((year) => year.principal),
+          backgroundColor: GREEN,
+          hoverBackgroundColor: EMERALD,
+          borderRadius: { topLeft: 0, topRight: 0, bottomLeft: 6, bottomRight: 6 },
+          borderSkipped: false,
+          maxBarThickness: 36,
+        },
+        {
+          label: "Intérêts",
+          data: yearlyPayments.map((year) => year.interest),
+          backgroundColor: RED,
+          hoverBackgroundColor: ROSE,
+          borderRadius: { topLeft: 6, topRight: 6, bottomLeft: 0, bottomRight: 0 },
+          borderSkipped: false,
+          maxBarThickness: 36,
+        },
+      ],
+    }),
+    [yearlyPayments],
+  );
+
+  const sharedOptions = {
     responsive: true,
+    maintainAspectRatio: false,
+    interaction: {
+      mode: "index" as const,
+      intersect: false,
+    },
     plugins: {
       legend: {
         position: "top" as const,
+        align: "end" as const,
+        labels: {
+          usePointStyle: true,
+          pointStyle: "circle" as const,
+          boxWidth: 8,
+          boxHeight: 8,
+          padding: 16,
+          color: "#4b5563",
+          font: { size: 12, weight: 500 as const },
+        },
       },
       tooltip: {
+        backgroundColor: "#111827",
+        titleColor: "#f9fafb",
+        bodyColor: "#e5e7eb",
+        borderColor: "rgba(255, 255, 255, 0.08)",
+        borderWidth: 1,
+        cornerRadius: 10,
+        padding: 12,
+        displayColors: true,
+        boxPadding: 4,
         callbacks: {
-          label: function (context: TooltipItem<"line" | "bar">) {
-            const value = context.parsed.y as number;
-            return `${context.dataset.label}: ${new Intl.NumberFormat("fr-FR", {
-              style: "currency",
-              currency: "EUR",
-            }).format(value)}`;
+          label: (context: TooltipItem<"line" | "bar">) => {
+            const value = context.parsed.y ?? 0;
+            return ` ${context.dataset.label}: ${formatCurrency(value)}`;
           },
         },
       },
     },
     scales: {
+      x: {
+        grid: {
+          display: false,
+        },
+        border: {
+          display: false,
+        },
+        ticks: {
+          color: "#9ca3af",
+          font: { size: 11 },
+          maxRotation: 0,
+        },
+      },
       y: {
         beginAtZero: true,
+        border: {
+          display: false,
+        },
+        grid: {
+          color: "rgba(15, 23, 42, 0.06)",
+          drawTicks: false,
+        },
         ticks: {
-          callback: function (value: string | number) {
-            return new Intl.NumberFormat("fr-FR", {
-              style: "currency",
-              currency: "EUR",
-              minimumFractionDigits: 0,
-              maximumFractionDigits: 0,
-            }).format(Number(value));
+          color: "#9ca3af",
+          font: { size: 11 },
+          padding: 8,
+          callback: (value: string | number) => formatAxisEuro(Number(value)),
+        },
+      },
+    },
+  };
+
+  const lineChartOptions = {
+    ...sharedOptions,
+    plugins: {
+      ...sharedOptions.plugins,
+      legend: {
+        ...sharedOptions.plugins.legend,
+        display: false,
+      },
+    },
+    scales: {
+      ...sharedOptions.scales,
+      x: {
+        ...sharedOptions.scales.x,
+        ticks: {
+          ...sharedOptions.scales.x.ticks,
+          autoSkip: false,
+          callback: (_value: string | number, index: number) => {
+            if (index % 12 !== 0) return "";
+            const year = index / 12 + 1;
+            return year === 1 || year % 5 === 0 ? `An ${year}` : "";
           },
         },
       },
@@ -101,20 +234,15 @@ const LoanChart = ({ schedule }: Props) => {
   };
 
   const barChartOptions = {
-    ...chartOptions,
-    plugins: {
-      ...chartOptions.plugins,
-      legend: {
-        position: "top" as const,
-      },
-    },
+    ...sharedOptions,
     scales: {
-      ...chartOptions.scales,
+      ...sharedOptions.scales,
       x: {
+        ...sharedOptions.scales.x,
         stacked: true,
       },
       y: {
-        ...chartOptions.scales.y,
+        ...sharedOptions.scales.y,
         stacked: true,
       },
     },
@@ -122,21 +250,25 @@ const LoanChart = ({ schedule }: Props) => {
 
   return (
     <div className="space-y-6">
-      {/* Évolution du capital restant */}
       <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">
+        <h3 className="text-lg font-semibold text-gray-800">
           Évolution du capital restant dû
         </h3>
+        <p className="text-sm text-gray-500 mb-4">
+          Décroissance du capital emprunté sur la durée du prêt
+        </p>
         <div className="h-80">
-          <Line data={remainingBalanceData} options={chartOptions} />
+          <Line data={remainingBalanceData} options={lineChartOptions} />
         </div>
       </div>
 
-      {/* Répartition capital/intérêts sur les 24 premiers mois */}
       <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">
-          Répartition Capital/Intérêts
+        <h3 className="text-lg font-semibold text-gray-800">
+          Répartition capital / intérêts
         </h3>
+        <p className="text-sm text-gray-500 mb-4">
+          Montants remboursés chaque année
+        </p>
         <div className="h-80">
           <Bar data={paymentsData} options={barChartOptions} />
         </div>
