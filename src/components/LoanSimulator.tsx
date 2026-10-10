@@ -27,10 +27,10 @@ import { Button } from "./ui/Button";
 import { Card } from "./ui/Card";
 import { Input } from "./ui/Input";
 import { RadioButtonGroup } from "./ui/RadioGroup";
-import { StatTile } from "./ui/StatTile";
+import { StatGroup, StatTile } from "./ui/StatTile";
 import { ValueRow } from "./ui/ValueRow";
 
-const DEFAULT_PROPERTY_TYPE: PropertyType = "Neuf";
+const DEFAULT_PROPERTY_TYPE: PropertyType = "Ancien";
 
 const PROPERTY_TYPE_LABEL: Record<PropertyType, string> = {
   Neuf: "neuf",
@@ -122,7 +122,10 @@ const LoanSimulator = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <StatGroup
+        label="Résultats de la simulation"
+        className="grid-cols-1 sm:grid-cols-2 xl:grid-cols-4"
+      >
         <StatTile
           label="Mensualité"
           value={formatCurrency(monthlyPayment)}
@@ -145,15 +148,16 @@ const LoanSimulator = () => {
           value={formatCurrency(totalProjectCost)}
           hint={`Dont ${formatCurrency(totalFees)} de frais`}
         />
-      </div>
+      </StatGroup>
 
       <Card
-        title="Type de bien"
-        className="relative z-10 py-3"
+        title="Le bien"
+        className="relative z-10"
         actions={
           <>
             <RadioButtonGroup
               name="propertyType"
+              label="Type de bien"
               options={["Neuf", "Ancien"]}
               value={propertyType}
               onChange={(value) => setPropertyType(value)}
@@ -169,21 +173,7 @@ const LoanSimulator = () => {
             </Button>
           </>
         }
-      />
-      <PropertyFeesSettings
-        open={feesSettingsOpen}
-        onClose={() => setFeesSettingsOpen(false)}
-        notaryRates={notaryRates}
-        brokerFees={brokerFeesByType}
-        onNotaryRateChange={(type, value) =>
-          setNotaryRates((prev) => ({ ...prev, [type]: value }))
-        }
-        onBrokerFeesChange={(type, value) =>
-          setBrokerFeesByType((prev) => ({ ...prev, [type]: value }))
-        }
-      />
-
-      <Card title="Valeur du bien et apport">
+      >
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <Input
             label="Valeur du bien"
@@ -207,6 +197,18 @@ const LoanSimulator = () => {
           tone="accent"
         />
       </Card>
+      <PropertyFeesSettings
+        open={feesSettingsOpen}
+        onClose={() => setFeesSettingsOpen(false)}
+        notaryRates={notaryRates}
+        brokerFees={brokerFeesByType}
+        onNotaryRateChange={(type, value) =>
+          setNotaryRates((prev) => ({ ...prev, [type]: value }))
+        }
+        onBrokerFeesChange={(type, value) =>
+          setBrokerFeesByType((prev) => ({ ...prev, [type]: value }))
+        }
+      />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-1">
@@ -312,8 +314,21 @@ const LoanSimulator = () => {
         </div>
 
         <div className="min-w-0 space-y-6 lg:col-span-2">
-          <LoanChart schedule={amortizationSchedule} />
-          <AmortizationTable schedule={amortizationSchedule} />
+          {amortizationSchedule.length > 0 && amountToFinance > 0 ? (
+            <>
+              <LoanChart schedule={amortizationSchedule} />
+              <AmortizationTable schedule={amortizationSchedule} />
+            </>
+          ) : (
+            <Card
+              title="Aucun emprunt à simuler"
+              description={
+                amountToFinance === 0
+                  ? "Votre apport couvre la valeur du bien. Réduisez l’apport pour afficher le plan d’amortissement."
+                  : "Indiquez une durée de prêt d’au moins 1 an pour afficher le plan d’amortissement."
+              }
+            />
+          )}
         </div>
       </div>
     </div>

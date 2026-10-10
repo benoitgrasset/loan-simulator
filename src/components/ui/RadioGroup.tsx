@@ -21,9 +21,9 @@ export const Radio = <T extends string>({
     <div className="group/radio relative">
       <label
         className={cn(
-          "flex items-center justify-center cursor-pointer px-4 py-1.5 rounded-md text-sm font-medium transition-colors",
+          "flex items-center justify-center cursor-pointer px-4 py-1.5 rounded-md text-sm font-medium transition-[color,background-color,box-shadow] duration-150 ease-out has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-blue-600",
           checked
-            ? "bg-white text-blue-600 shadow-sm"
+            ? "bg-white text-blue-700 shadow-sm"
             : "text-gray-600 hover:text-gray-900",
         )}
       >
@@ -42,7 +42,7 @@ export const Radio = <T extends string>({
         <span
           id={hintId}
           role="tooltip"
-          className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 w-max max-w-xs -translate-x-1/2 rounded-lg bg-gray-900 px-3 py-2 text-left text-xs font-normal leading-5 text-white whitespace-pre-line opacity-0 shadow-lg transition-opacity group-hover/radio:opacity-100 group-focus-within/radio:opacity-100"
+          className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 w-max max-w-xs -translate-x-1/2 rounded-lg bg-gray-900 px-3 py-2 text-left text-xs font-normal leading-5 text-white whitespace-pre-line opacity-0 shadow-lg transition-opacity duration-150 ease-out group-hover/radio:opacity-100 group-focus-within/radio:opacity-100"
         >
           {hint}
         </span>
@@ -53,6 +53,7 @@ export const Radio = <T extends string>({
 
 type RadioButtonGroupProps<T extends string> = {
   name: string;
+  label: string;
   options: T[];
   value: T;
   onChange: (value: T) => void;
@@ -61,12 +62,13 @@ type RadioButtonGroupProps<T extends string> = {
 
 export const RadioButtonGroup = <T extends string>({
   name,
+  label,
   options,
   value,
   onChange,
   hints,
 }: RadioButtonGroupProps<T>) => (
-  <div role="radiogroup" className="inline-flex gap-1 bg-gray-100 p-1 rounded-[10px]">
+  <div role="radiogroup" aria-label={label} className="inline-flex gap-1 bg-gray-100 p-1 rounded-[10px]">
     {options.map((option) => (
       <Radio
         key={option}

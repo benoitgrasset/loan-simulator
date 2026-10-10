@@ -10,54 +10,48 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation */}
-      <nav className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <h1 className="text-xl font-bold text-gray-900">
-                Simulateur Financier Immobilier
-              </h1>
-            </div>
+      <nav className="border-b border-gray-200 bg-white shadow-sm">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-6 gap-y-3 px-4 py-3 sm:px-6 lg:px-8">
+          <p className="text-xl font-bold tracking-[-0.01em] text-gray-900">
+            Simulateur financier immobilier
+          </p>
 
-            <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
-              <TabButton
-                isActive={activeTab === "loan"}
-                onClick={() => setActiveTab("loan")}
-                icon={Calculator}
-                activeColor="blue"
-              >
-                Crédit Immobilier
-              </TabButton>
-              <TabButton
-                isActive={activeTab === "investment"}
-                onClick={() => setActiveTab("investment")}
-                icon={Building2}
-                activeColor="green"
-              >
-                Investissement De Normandie
-              </TabButton>
-            </div>
+          <div className="flex gap-1 rounded-[10px] bg-gray-100 p-1">
+            <TabButton
+              isActive={activeTab === "loan"}
+              onClick={() => setActiveTab("loan")}
+              icon={Calculator}
+              activeColor="blue"
+            >
+              Crédit immobilier
+            </TabButton>
+            <TabButton
+              isActive={activeTab === "investment"}
+              onClick={() => setActiveTab("investment")}
+              icon={Building2}
+              activeColor="green"
+            >
+              Investissement Denormandie
+            </TabButton>
           </div>
         </div>
       </nav>
 
       {/* Contenu principal */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         {activeTab === "loan" ? <LoanSimulator /> : <InvestmentSimulator />}
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <p className="text-gray-500 text-sm">
-              Simulateur Financier Immobilier - Outil d'aide à la décision
-            </p>
-            <p className="text-gray-400 text-xs mt-2">
-              Les calculs sont donnés à titre indicatif et ne constituent pas un
-              engagement contractuel
-            </p>
-          </div>
+      <footer className="mt-16 border-t border-gray-200 bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-8 text-center sm:px-6 lg:px-8">
+          <p className="text-sm text-gray-600">
+            Simulateur financier immobilier — outil d’aide à la décision
+          </p>
+          <p className="mt-2 text-xs text-gray-500 text-pretty">
+            Les calculs sont donnés à titre indicatif et ne constituent pas un
+            engagement contractuel.
+          </p>
         </div>
       </footer>
     </div>
