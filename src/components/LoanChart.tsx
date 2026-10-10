@@ -15,6 +15,8 @@ import { useMemo } from "react";
 import { Bar, Line } from "react-chartjs-2";
 import { AmortizationRow } from "../types";
 import { formatCurrency } from "../utils/calculations";
+import { readCssColor } from "../utils/colors";
+import { Card } from "./ui/Card";
 
 ChartJS.register(
   CategoryScale,
@@ -31,12 +33,6 @@ type Props = {
   schedule: AmortizationRow[];
 };
 
-const BLUE = "#2563eb";
-const EMERALD = "#059669";
-const ROSE = "#e11d48";
-const RED = "rgba(225, 29, 72, 0.82)";
-const GREEN = "rgba(5, 150, 105, 0.88)";
-
 const formatAxisEuro = (value: number) => {
   if (Math.abs(value) >= 1_000_000) {
     return `${(value / 1_000_000).toLocaleString("fr-FR", {
@@ -49,45 +45,59 @@ const formatAxisEuro = (value: number) => {
   return `${Math.round(value)} €`;
 };
 
-const createAreaGradient = (context: ScriptableContext<"line">) => {
-  const { ctx, chartArea } = context.chart;
-  if (!chartArea) return "rgba(37, 99, 235, 0.12)";
-
-  const gradient = ctx.createLinearGradient(
-    0,
-    chartArea.top,
-    0,
-    chartArea.bottom,
-  );
-  gradient.addColorStop(0, "rgba(37, 99, 235, 0.38)");
-  gradient.addColorStop(0.55, "rgba(37, 99, 235, 0.12)");
-  gradient.addColorStop(1, "rgba(37, 99, 235, 0)");
-  return gradient;
-};
-
 const LoanChart = ({ schedule }: Props) => {
-  const remainingBalanceData = useMemo(
+  const colors = useMemo(
     () => ({
+      balance: readCssColor("--color-blue-600"),
+      balanceArea: (alpha: number) => readCssColor("--color-blue-600", alpha),
+      capital: readCssColor("--color-capital", 0.9),
+      capitalHover: readCssColor("--color-capital"),
+      interest: readCssColor("--color-interest", 0.85),
+      interestHover: readCssColor("--color-interest"),
+      axisText: readCssColor("--color-gray-500"),
+      legendText: readCssColor("--color-gray-600"),
+      tooltipBg: readCssColor("--color-gray-900"),
+    }),
+    [],
+  );
+
+  const remainingBalanceData = useMemo(() => {
+    const createAreaGradient = (context: ScriptableContext<"line">) => {
+      const { ctx, chartArea } = context.chart;
+      if (!chartArea) return colors.balanceArea(0.12);
+
+      const gradient = ctx.createLinearGradient(
+        0,
+        chartArea.top,
+        0,
+        chartArea.bottom,
+      );
+      gradient.addColorStop(0, colors.balanceArea(0.38));
+      gradient.addColorStop(0.55, colors.balanceArea(0.12));
+      gradient.addColorStop(1, colors.balanceArea(0));
+      return gradient;
+    };
+
+    return {
       labels: schedule.map((row) => row.month),
       datasets: [
         {
           label: "Capital restant dû",
           data: schedule.map((row) => row.remainingBalance),
-          borderColor: BLUE,
+          borderColor: colors.balance,
           backgroundColor: createAreaGradient,
           borderWidth: 2.5,
           tension: 0.35,
           fill: true,
           pointRadius: 0,
           pointHoverRadius: 5,
-          pointHoverBackgroundColor: BLUE,
+          pointHoverBackgroundColor: colors.balance,
           pointHoverBorderColor: "#fff",
           pointHoverBorderWidth: 2,
         },
       ],
-    }),
-    [schedule],
-  );
+    };
+  }, [schedule, colors]);
 
   const yearlyPayments = useMemo(() => {
     const years: { label: string; principal: number; interest: number }[] = [];
@@ -115,8 +125,8 @@ const LoanChart = ({ schedule }: Props) => {
         {
           label: "Capital",
           data: yearlyPayments.map((year) => year.principal),
-          backgroundColor: GREEN,
-          hoverBackgroundColor: EMERALD,
+          backgroundColor: colors.capital,
+          hoverBackgroundColor: colors.capitalHover,
           borderRadius: { topLeft: 0, topRight: 0, bottomLeft: 6, bottomRight: 6 },
           borderSkipped: false,
           maxBarThickness: 36,
@@ -124,15 +134,15 @@ const LoanChart = ({ schedule }: Props) => {
         {
           label: "Intérêts",
           data: yearlyPayments.map((year) => year.interest),
-          backgroundColor: RED,
-          hoverBackgroundColor: ROSE,
+          backgroundColor: colors.interest,
+          hoverBackgroundColor: colors.interestHover,
           borderRadius: { topLeft: 6, topRight: 6, bottomLeft: 0, bottomRight: 0 },
           borderSkipped: false,
           maxBarThickness: 36,
         },
       ],
     }),
-    [yearlyPayments],
+    [yearlyPayments, colors],
   );
 
   const sharedOptions = {
@@ -152,14 +162,14 @@ const LoanChart = ({ schedule }: Props) => {
           boxWidth: 8,
           boxHeight: 8,
           padding: 16,
-          color: "#4b5563",
+          color: colors.legendText,
           font: { size: 12, weight: 500 as const },
         },
       },
       tooltip: {
-        backgroundColor: "#111827",
-        titleColor: "#f9fafb",
-        bodyColor: "#e5e7eb",
+        backgroundColor: colors.tooltipBg,
+        titleColor: "#fff",
+        bodyColor: "#fff",
         borderColor: "rgba(255, 255, 255, 0.08)",
         borderWidth: 1,
         cornerRadius: 10,
@@ -169,7 +179,7 @@ const LoanChart = ({ schedule }: Props) => {
         callbacks: {
           label: (context: TooltipItem<"line" | "bar">) => {
             const value = context.parsed.y ?? 0;
-            return ` ${context.dataset.label}: ${formatCurrency(value)}`;
+            return ` ${context.dataset.label} : ${formatCurrency(value)}`;
           },
         },
       },
@@ -183,8 +193,8 @@ const LoanChart = ({ schedule }: Props) => {
           display: false,
         },
         ticks: {
-          color: "#9ca3af",
-          font: { size: 11 },
+          color: colors.axisText,
+          font: { size: 12 },
           maxRotation: 0,
         },
       },
@@ -198,8 +208,8 @@ const LoanChart = ({ schedule }: Props) => {
           drawTicks: false,
         },
         ticks: {
-          color: "#9ca3af",
-          font: { size: 11 },
+          color: colors.axisText,
+          font: { size: 12 },
           padding: 8,
           callback: (value: string | number) => formatAxisEuro(Number(value)),
         },
@@ -250,29 +260,23 @@ const LoanChart = ({ schedule }: Props) => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-        <h3 className="text-lg font-semibold text-gray-800">
-          Évolution du capital restant dû
-        </h3>
-        <p className="text-sm text-gray-500 mb-4">
-          Décroissance du capital emprunté sur la durée du prêt
-        </p>
-        <div className="h-80">
+      <Card
+        title="Évolution du capital restant dû"
+        description="Décroissance du capital emprunté sur la durée du prêt"
+      >
+        <div className="relative h-80">
           <Line data={remainingBalanceData} options={lineChartOptions} />
         </div>
-      </div>
+      </Card>
 
-      <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-        <h3 className="text-lg font-semibold text-gray-800">
-          Répartition capital / intérêts
-        </h3>
-        <p className="text-sm text-gray-500 mb-4">
-          Montants remboursés chaque année
-        </p>
-        <div className="h-80">
+      <Card
+        title="Répartition capital / intérêts"
+        description="Montants remboursés chaque année"
+      >
+        <div className="relative h-80">
           <Bar data={paymentsData} options={barChartOptions} />
         </div>
-      </div>
+      </Card>
     </div>
   );
 };

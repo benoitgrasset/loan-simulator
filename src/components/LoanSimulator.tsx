@@ -1,4 +1,4 @@
-import { Calculator, EuroIcon, Home, Settings2, TrendingUp } from "lucide-react";
+import { Calculator, Settings2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import {
   BROKER_FEES,
@@ -16,16 +16,26 @@ import {
 import { useFinancialStore } from "../stores/useFinancialStore";
 import {
   formatCurrency,
+  formatRate,
+  formatYears,
   generateAmortizationSchedule,
 } from "../utils/calculations";
 import AmortizationTable from "./AmortizationTable";
 import LoanChart from "./LoanChart";
 import { PropertyFeesSettings } from "./PropertyFeesSettings";
+import { Button } from "./ui/Button";
+import { Card } from "./ui/Card";
 import { Input } from "./ui/Input";
-import { Label } from "./ui/Label";
 import { RadioButtonGroup } from "./ui/RadioGroup";
+import { StatTile } from "./ui/StatTile";
+import { ValueRow } from "./ui/ValueRow";
 
 const DEFAULT_PROPERTY_TYPE: PropertyType = "Neuf";
+
+const PROPERTY_TYPE_LABEL: Record<PropertyType, string> = {
+  Neuf: "neuf",
+  Ancien: "ancien",
+};
 
 const LoanSimulator = () => {
   const { duration, setDuration, interestRate, setInterestRate } =
@@ -76,6 +86,7 @@ const LoanSimulator = () => {
       amortizationSchedule.reduce((sum, row) => sum + row.interestPayment, 0),
     [amortizationSchedule],
   );
+  const totalRepaid = loanAmount + totalInterest + ptzAmount;
 
   // Calcul des mensualités
   const monthlyPayment = amortizationSchedule[0]?.monthlyPayment || 0;
@@ -87,309 +98,220 @@ const LoanSimulator = () => {
   const notaryRate = notaryRates[propertyType];
   const brokerFees = brokerFeesByType[propertyType];
   const propertyTypeHints: Record<PropertyType, string> = {
-    Neuf: `Frais de notaire : ${notaryRates.Neuf} %\nFrais de courtier : ${formatCurrency(brokerFeesByType.Neuf)}`,
-    Ancien: `Frais de notaire : ${notaryRates.Ancien} %\nFrais de courtier : ${formatCurrency(brokerFeesByType.Ancien)}`,
+    Neuf: `Frais de notaire : ${formatRate(notaryRates.Neuf)}\nFrais de courtier : ${formatCurrency(brokerFeesByType.Neuf)}`,
+    Ancien: `Frais de notaire : ${formatRate(notaryRates.Ancien)}\nFrais de courtier : ${formatCurrency(brokerFeesByType.Ancien)}`,
   };
   const notaryFees = (propertyValue * notaryRate) / 100;
 
   // Calcul du total des frais
   const totalFees =
-    works +
-    guaranteeFees +
-    applicationFees +
-    notaryFees +
-    brokerFees;
+    works + guaranteeFees + applicationFees + notaryFees + brokerFees;
   const totalProjectCost = propertyValue + totalFees;
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-6 rounded-xl">
-        <div className="flex items-center gap-3 mb-2">
-          <Calculator className="w-8 h-8" />
-          <h1 className="text-2xl font-bold">
-            Simulation de Crédit Immobilier
+      <div className="rounded-xl bg-gradient-to-r from-blue-700 to-blue-800 p-6 text-white">
+        <div className="mb-2 flex items-center gap-3">
+          <Calculator className="h-8 w-8 shrink-0" />
+          <h1 className="text-2xl font-bold tracking-[-0.01em] text-balance">
+            Simulation de crédit immobilier
           </h1>
         </div>
         <p className="text-blue-100">
-          Calculez votre plan d'amortissement détaillé
+          Calculez votre plan d’amortissement détaillé
         </p>
       </div>
 
-      {/* Switch neuf / ancien */}
-      <div className="relative z-10 bg-white rounded-xl shadow-lg px-4 py-3 border border-gray-100 flex flex-wrap items-center justify-between gap-3 w-1/2 overflow-visible">
-        <h2 className="text-base font-semibold text-gray-800">Type de bien</h2>
-        <div className="flex items-center gap-1">
-          <RadioButtonGroup
-            name="propertyType"
-            options={["Neuf", "Ancien"]}
-            value={propertyType}
-            onChange={(value) => setPropertyType(value)}
-            hints={propertyTypeHints}
-          />
-          <button
-            type="button"
-            onClick={() => setFeesSettingsOpen(true)}
-            className="rounded-md p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-800 cursor-pointer"
-            aria-label="Paramétrer les frais de notaire et de courtier"
-            title="Paramétrer les frais"
-          >
-            <Settings2 className="h-4 w-4" />
-          </button>
-        </div>
-        <PropertyFeesSettings
-          open={feesSettingsOpen}
-          onClose={() => setFeesSettingsOpen(false)}
-          notaryRates={notaryRates}
-          brokerFees={brokerFeesByType}
-          onNotaryRateChange={(type, value) =>
-            setNotaryRates((prev) => ({ ...prev, [type]: value }))
-          }
-          onBrokerFeesChange={(type, value) =>
-            setBrokerFeesByType((prev) => ({ ...prev, [type]: value }))
-          }
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatTile
+          label="Mensualité"
+          value={formatCurrency(monthlyPayment)}
+          hint={`Sur ${formatYears(duration)}`}
+          tone="accent"
+        />
+        <StatTile
+          label="Coût mensuel total"
+          value={formatCurrency(totalMonthlyCost)}
+          hint="Mensualité, charges, électricité et taxe foncière"
+        />
+        <StatTile
+          label="Coût total du crédit"
+          value={formatCurrency(totalInterest)}
+          hint={`Total remboursé : ${formatCurrency(totalRepaid)}`}
+          tone="interest"
+        />
+        <StatTile
+          label="Coût total du projet"
+          value={formatCurrency(totalProjectCost)}
+          hint={`Dont ${formatCurrency(totalFees)} de frais`}
         />
       </div>
 
-      {/* Valeur du bien et apport */}
-      <div className="bg-white rounded-xl shadow-lg p-4 border border-gray-100">
-        <h2 className="text-lg font-semibold text-gray-800 mb-3">
-          Valeur du bien et apport
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div className="font-bold">
-            <Label>Valeur du bien</Label>
-            <Input
-              value={propertyValue}
-              onChange={(value) => setPropertyValue(value)}
-              symbol="€"
-              step={1000}
+      <Card
+        title="Type de bien"
+        className="relative z-10 py-3"
+        actions={
+          <>
+            <RadioButtonGroup
+              name="propertyType"
+              options={["Neuf", "Ancien"]}
+              value={propertyType}
+              onChange={(value) => setPropertyType(value)}
+              hints={propertyTypeHints}
             />
-          </div>
-          <div>
-            <Label>Apport</Label>
-            <Input
-              value={downPayment}
-              onChange={(value) => setDownPayment(value)}
-              symbol="€"
-              step={1000}
-            />
-          </div>
-          <div className="md:col-span-1 flex items-center justify-between px-3 py-2 bg-blue-50 rounded-lg">
-            <span className="text-sm font-medium text-gray-700">
-              Montant à financer
-            </span>
-            <span className="font-bold text-blue-600">
-              {formatCurrency(amountToFinance)}
-            </span>
-          </div>
+            <Button
+              onClick={() => setFeesSettingsOpen(true)}
+              className="rounded-md p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-800"
+              aria-label="Paramétrer les frais de notaire et de courtier"
+              title="Paramétrer les frais"
+            >
+              <Settings2 className="h-4 w-4" />
+            </Button>
+          </>
+        }
+      />
+      <PropertyFeesSettings
+        open={feesSettingsOpen}
+        onClose={() => setFeesSettingsOpen(false)}
+        notaryRates={notaryRates}
+        brokerFees={brokerFeesByType}
+        onNotaryRateChange={(type, value) =>
+          setNotaryRates((prev) => ({ ...prev, [type]: value }))
+        }
+        onBrokerFeesChange={(type, value) =>
+          setBrokerFeesByType((prev) => ({ ...prev, [type]: value }))
+        }
+      />
+
+      <Card title="Valeur du bien et apport">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <Input
+            label="Valeur du bien"
+            value={propertyValue}
+            onChange={(value) => setPropertyValue(value)}
+            symbol="€"
+            step={1000}
+          />
+          <Input
+            label="Apport"
+            value={downPayment}
+            onChange={(value) => setDownPayment(value)}
+            symbol="€"
+            step={1000}
+          />
         </div>
-      </div>
+        <ValueRow
+          className="mt-4"
+          label="Montant à financer"
+          value={formatCurrency(amountToFinance)}
+          tone="accent"
+        />
+      </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Formulaire de saisie */}
-        <div className="lg:col-span-1 space-y-6">
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">
-              Paramètres du prêt
-            </h2>
-
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="space-y-6 lg:col-span-1">
+          <Card title="Paramètres du prêt">
             <div className="space-y-4">
-              <div>
-                <Label>Montant à emprunter (hors PTZ)</Label>
-                <Input value={loanAmount} symbol="€" disabled />
-              </div>
-
-              <div>
-                <Label>Taux d'intérêt annuel</Label>
-                <Input
-                  value={interestRate}
-                  onChange={(value) => setInterestRate(value)}
-                  symbol="%"
-                  step={0.05}
-                />
-              </div>
-
-              <div>
-                <Label>Durée du prêt</Label>
-                <Input
-                  value={duration}
-                  onChange={(value) => setDuration(value)}
-                  symbol="ans"
-                  step={1}
-                />
-              </div>
-              <div>
-                <Label>Montant PTZ</Label>
-                <Input
-                  value={ptz}
-                  onChange={(value) => setPtz(value)}
-                  symbol="€"
-                  step={5000}
-                />
-              </div>
+              <Input
+                label="Taux d’intérêt annuel"
+                value={interestRate}
+                onChange={(value) => setInterestRate(value)}
+                symbol="%"
+                step={0.05}
+              />
+              <Input
+                label="Durée du prêt"
+                value={duration}
+                onChange={(value) => setDuration(value)}
+                symbol="ans"
+                step={1}
+              />
+              <Input
+                label="Prêt à taux zéro (PTZ)"
+                value={ptz}
+                onChange={(value) => setPtz(value)}
+                symbol="€"
+                step={5000}
+              />
             </div>
-          </div>
+            <ValueRow
+              className="mt-6"
+              label="Montant à emprunter (hors PTZ)"
+              value={formatCurrency(loanAmount)}
+              tone="strong"
+            />
+          </Card>
 
-          {/* Résumé */}
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Résumé (Prêt + intérêts)</h3>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <EuroIcon className="w-5 h-5 text-blue-600" />
-                  <span className="text-sm font-medium text-gray-700">
-                    Mensualité
-                  </span>
-                </div>
-                <span className="font-bold text-blue-600">
-                  {formatCurrency(monthlyPayment)}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-green-600" />
-                  <span className="text-sm font-medium text-gray-700">
-                    Coût total du crédit
-                  </span>
-                </div>
-                <span className="font-bold text-green-600">
-                  {formatCurrency(totalInterest)}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <span className="text-sm font-medium text-gray-500">
-                  Montant total remboursé
-                </span>
-                <span className="font-bold text-gray-500">
-                  {formatCurrency(loanAmount + totalInterest + ptzAmount)}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Charges et mensualités */}
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">
-              Charges et mensualités
-            </h2>
-
+          <Card title="Charges du logement">
             <div className="space-y-4">
-              <div>
-                <Label>Charges mensuelles</Label>
-                <Input
-                  value={monthlyCharges}
-                  onChange={setMonthlyCharges}
-                  symbol="€/mois"
-                />
-              </div>
-
-              <div>
-                <Label>EDF</Label>
-                <Input
-                  value={edf}
-                  onChange={setEdf}
-                  symbol="€/mois"
-                  step={25}
-                />
-              </div>
-
-              <div>
-                <Label>Taxe foncière annuelle</Label>
-                <Input
-                  value={propertyTax}
-                  onChange={setPropertyTax}
-                  symbol="€/an"
-                  step={50}
-                />
-              </div>
-
-              <div className="flex items-center justify-between p-3 bg-indigo-50 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <Home className="w-5 h-5 text-indigo-600" />
-                  <span className="text-sm font-medium text-gray-700">
-                    Mensualités totales
-                  </span>
-                </div>
-                <span className="font-bold text-indigo-600">
-                  {formatCurrency(totalMonthlyCost)}
-                </span>
-              </div>
+              <Input
+                label="Charges mensuelles"
+                value={monthlyCharges}
+                onChange={setMonthlyCharges}
+                symbol="€/mois"
+              />
+              <Input
+                label="Électricité"
+                value={edf}
+                onChange={setEdf}
+                symbol="€/mois"
+                step={25}
+              />
+              <Input
+                label="Taxe foncière annuelle"
+                value={propertyTax}
+                onChange={setPropertyTax}
+                symbol="€/an"
+                step={50}
+              />
             </div>
-          </div>
+          </Card>
 
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">
-              Coût du projet
-            </h2>
-
+          <Card title="Coût du projet">
             <div className="space-y-4">
-              <div>
-                <Label>Travaux</Label>
-                <Input
-                  value={works}
-                  onChange={(value) => setWorks(value)}
-                  symbol="€"
-                  step={500}
-                />
-              </div>
-
-              <div>
-                <Label>Frais de notaire ({notaryRate}% - {propertyType === "Neuf" ? "neuf" : "ancien"})</Label>
-                <span className="inline-block px-4">{formatCurrency(notaryFees)}</span>
-              </div>
-
-              <div>
-                <Label>Frais de garantie</Label>
-                <Input
-                  value={guaranteeFees}
-                  onChange={(value) => setGuaranteeFees(value)}
-                  symbol="€"
-                  step={500}
-                />
-              </div>
-
-              <div>
-                <Label>Frais de dossier</Label>
-                <Input
-                  value={applicationFees}
-                  onChange={(value) => setApplicationFees(value)}
-                  symbol="€"
-                  step={500}
-                />
-              </div>
-
-              <div>
-                <Label>Frais de courtier ({propertyType === "Neuf" ? "neuf" : "ancien"})</Label>
-                <span className="inline-block px-4">{formatCurrency(brokerFees)}</span>
-              </div>
-
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <Label className="mb-0">Total des frais</Label>
-                <span className="text-gray-700">
-                  {formatCurrency(totalFees)}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <EuroIcon className="w-5 h-5 text-blue-600" />
-                <span className="text-sm font-medium text-gray-700">
-                  Coût total du projet
-                </span>
-                </div>
-                <span className="font-bold text-blue-600">
-                  {formatCurrency(totalProjectCost)}
-                </span>
-              </div>
+              <Input
+                label="Travaux"
+                value={works}
+                onChange={(value) => setWorks(value)}
+                symbol="€"
+                step={500}
+              />
+              <Input
+                label="Frais de garantie"
+                value={guaranteeFees}
+                onChange={(value) => setGuaranteeFees(value)}
+                symbol="€"
+                step={500}
+              />
+              <Input
+                label="Frais de dossier"
+                value={applicationFees}
+                onChange={(value) => setApplicationFees(value)}
+                symbol="€"
+                step={500}
+              />
             </div>
-          </div>
+            <div className="mt-6 space-y-2">
+              <ValueRow
+                label="Frais de notaire"
+                hint={`${PROPERTY_TYPE_LABEL[propertyType]}, ${formatRate(notaryRate)}`}
+                value={formatCurrency(notaryFees)}
+              />
+              <ValueRow
+                label="Frais de courtier"
+                hint={PROPERTY_TYPE_LABEL[propertyType]}
+                value={formatCurrency(brokerFees)}
+              />
+              <ValueRow
+                label="Total des frais"
+                value={formatCurrency(totalFees)}
+                tone="strong"
+              />
+            </div>
+          </Card>
         </div>
 
-        {/* Graphique et tableau */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="min-w-0 space-y-6 lg:col-span-2">
           <LoanChart schedule={amortizationSchedule} />
           <AmortizationTable schedule={amortizationSchedule} />
         </div>

@@ -169,6 +169,26 @@ export function formatCurrency(amount: number): string {
   }).format(amount);
 }
 
+const rateFormatter = new Intl.NumberFormat("fr-FR", {
+  style: "percent",
+  maximumFractionDigits: 2,
+});
+
+/** Formats a rate expressed in percent, such as `2.5` for 2,5 %. */
+export function formatRate(value: number): string {
+  return rateFormatter.format(value / 100);
+}
+
+const yearsFormatter = new Intl.NumberFormat("fr-FR", {
+  style: "unit",
+  unit: "year",
+  unitDisplay: "long",
+});
+
+export function formatYears(value: number): string {
+  return yearsFormatter.format(value);
+}
+
 export function formatPercentage(value: number): string {
   return `${value.toFixed(2)}%`;
 }

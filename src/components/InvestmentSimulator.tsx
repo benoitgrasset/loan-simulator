@@ -8,7 +8,6 @@ import {
   formatPercentage,
 } from "../utils/calculations";
 import { Input } from "./ui/Input";
-import { Label } from "./ui/Label";
 
 const propertyPrice = 140000;
 
@@ -87,8 +86,8 @@ const InvestmentSimulator = () => {
 
             <div className="space-y-4">
               <div>
-                <Label>Prix du bien</Label>
                 <Input
+                  label="Prix du bien"
                   value={investmentData.propertyPrice}
                   onChange={(value) =>
                     handleInputChange("propertyPrice", value)
@@ -98,8 +97,8 @@ const InvestmentSimulator = () => {
               </div>
 
               <div>
-                <Label>Loyer mensuel</Label>
                 <Input
+                  label="Loyer mensuel"
                   value={investmentData.monthlyRent}
                   onChange={(value) => handleInputChange("monthlyRent", value)}
                   symbol="€/mois"
@@ -107,8 +106,8 @@ const InvestmentSimulator = () => {
               </div>
 
               <div>
-                <Label>Taxe foncière annuelle</Label>
                 <Input
+                  label="Taxe foncière annuelle"
                   value={investmentData.propertyTax}
                   onChange={(value) => handleInputChange("propertyTax", value)}
                   symbol="€/an"
@@ -125,8 +124,8 @@ const InvestmentSimulator = () => {
 
             <div className="space-y-4">
               <div>
-                <Label>Montant emprunté</Label>
                 <Input
+                  label="Montant emprunté"
                   value={investmentData.loanAmount}
                   onChange={(value) => handleInputChange("loanAmount", value)}
                   symbol="€"
@@ -134,8 +133,8 @@ const InvestmentSimulator = () => {
               </div>
 
               <div>
-                <Label>Taux d'intérêt</Label>
                 <Input
+                  label="Taux d’intérêt"
                   value={investmentData.interestRate}
                   onChange={(value) => handleInputChange("interestRate", value)}
                   symbol="%"
@@ -144,8 +143,8 @@ const InvestmentSimulator = () => {
               </div>
 
               <div>
-                <Label>Durée</Label>
                 <Input
+                  label="Durée"
                   value={investmentData.duration}
                   onChange={(value) => handleInputChange("duration", value)}
                   symbol="ans"
@@ -162,8 +161,8 @@ const InvestmentSimulator = () => {
 
             <div className="space-y-4">
               <div>
-                <Label>Travaux</Label>
                 <Input
+                  label="Travaux"
                   value={investmentData.renovationCosts}
                   onChange={(value) =>
                     handleInputChange("renovationCosts", value)
@@ -173,8 +172,8 @@ const InvestmentSimulator = () => {
               </div>
 
               <div>
-                <Label>Frais de notaire</Label>
                 <Input
+                  label="Frais de notaire"
                   value={investmentData.notaryFees}
                   onChange={(value) => handleInputChange("notaryFees", value)}
                   symbol="€"
@@ -182,8 +181,8 @@ const InvestmentSimulator = () => {
               </div>
 
               <div>
-                <Label>Frais de dossier</Label>
                 <Input
+                  label="Frais de dossier"
                   value={investmentData.loanFees}
                   onChange={(value) => handleInputChange("loanFees", value)}
                   symbol="€"
@@ -191,8 +190,8 @@ const InvestmentSimulator = () => {
               </div>
 
               <div>
-                <Label>Commission cabinet / Frais de courtage</Label>
                 <Input
+                  label="Commission cabinet / Frais de courtage"
                   value={investmentData.cabinetCommission}
                   onChange={(value) =>
                     handleInputChange("cabinetCommission", value)
@@ -202,8 +201,8 @@ const InvestmentSimulator = () => {
               </div>
 
               <div>
-                <Label>Réduction d'impôts</Label>
                 <Input
+                  label="Réduction d’impôts"
                   value={investmentData.taxReduction}
                   onChange={(value) => handleInputChange("taxReduction", value)}
                   symbol="€"

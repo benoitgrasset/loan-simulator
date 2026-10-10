@@ -1,7 +1,6 @@
 import { PropertyType } from "../constants";
 import { Dialog } from "./ui/Dialog";
 import { Input } from "./ui/Input";
-import { Label } from "./ui/Label";
 
 type Props = {
   open: boolean;
@@ -23,44 +22,42 @@ export const PropertyFeesSettings = ({
   onBrokerFeesChange,
 }: Props) => (
   <Dialog open={open} title="Frais selon le type de bien" onClose={onClose}>
-    <div className="space-y-5">
-      <section className="space-y-3">
-        <h4 className="text-sm font-bold text-gray-700">
+    <div className="space-y-6">
+      <fieldset className="space-y-3">
+        <legend className="text-sm font-semibold text-gray-700">
           Frais de notaire
-        </h4>
+        </legend>
         <div className="grid grid-cols-2 gap-3">
           {PROPERTY_TYPES.map((type) => (
-            <div key={`notary-${type}`}>
-              <Label>{type}</Label>
-              <Input
-                value={notaryRates[type]}
-                onChange={(value) => onNotaryRateChange(type, value)}
-                symbol="%"
-                step={0.1}
-              />
-            </div>
+            <Input
+              key={`notary-${type}`}
+              label={type}
+              value={notaryRates[type]}
+              onChange={(value) => onNotaryRateChange(type, value)}
+              symbol="%"
+              step={0.1}
+            />
           ))}
         </div>
-      </section>
+      </fieldset>
 
-      <section className="space-y-3">
-        <h4 className="text-sm font-bold text-gray-700">
+      <fieldset className="space-y-3">
+        <legend className="text-sm font-semibold text-gray-700">
           Frais de courtier
-        </h4>
+        </legend>
         <div className="grid grid-cols-2 gap-3">
           {PROPERTY_TYPES.map((type) => (
-            <div key={`broker-${type}`}>
-              <Label>{type}</Label>
-              <Input
-                value={brokerFees[type]}
-                onChange={(value) => onBrokerFeesChange(type, value)}
-                symbol="€"
-                step={100}
-              />
-            </div>
+            <Input
+              key={`broker-${type}`}
+              label={type}
+              value={brokerFees[type]}
+              onChange={(value) => onBrokerFeesChange(type, value)}
+              symbol="€"
+              step={100}
+            />
           ))}
         </div>
-      </section>
+      </fieldset>
     </div>
   </Dialog>
 );

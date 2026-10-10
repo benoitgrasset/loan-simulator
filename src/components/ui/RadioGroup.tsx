@@ -66,7 +66,7 @@ export const RadioButtonGroup = <T extends string>({
   onChange,
   hints,
 }: RadioButtonGroupProps<T>) => (
-  <div role="radiogroup" className="inline-flex gap-1 bg-gray-100 p-1 rounded-lg">
+  <div role="radiogroup" className="inline-flex gap-1 bg-gray-100 p-1 rounded-[10px]">
     {options.map((option) => (
       <Radio
         key={option}

@@ -26,6 +26,7 @@ export const Dialog = ({ open, title, onClose, children }: Props) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <Button
+        static
         aria-label="Fermer"
         className="absolute inset-0 bg-black/40"
         onClick={onClose}

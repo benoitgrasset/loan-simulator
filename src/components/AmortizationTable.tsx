@@ -2,11 +2,18 @@ import { ChevronLeft, ChevronRight, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { AmortizationRow } from "../types";
 import { formatCurrency } from "../utils/calculations";
+import { Button } from "./ui/Button";
+import { Card } from "./ui/Card";
 import TableHeader from "./ui/TableHeader";
 
 type Props = {
   schedule: AmortizationRow[];
 };
+
+const CELL = "px-4 py-3 whitespace-nowrap text-sm";
+
+const PAGE_BUTTON =
+  "flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50";
 
 const AmortizationTable = ({ schedule }: Props) => {
   const [currentPage, setCurrentPage] = useState(0);
@@ -42,60 +49,69 @@ const AmortizationTable = ({ schedule }: Props) => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-gray-100">
-      <div className="p-6 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-800">
-            Tableau d'amortissement
-          </h3>
-          <button
-            onClick={() => setShowAllRows(!showAllRows)}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
-          >
-            {showAllRows ? (
-              <EyeOff className="w-4 h-4" />
-            ) : (
-              <Eye className="w-4 h-4" />
-            )}
-            {showAllRows ? "Vue paginée" : "Voir tout"}
-          </button>
-        </div>
-      </div>
-
-      <div className="overflow-x-auto">
-        <table className="w-full">
+    <Card
+      title="Tableau d’amortissement"
+      className="overflow-hidden pb-0"
+      actions={
+        <Button
+          onClick={() => setShowAllRows(!showAllRows)}
+          className="flex items-center gap-2 whitespace-nowrap rounded-lg bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 hover:bg-blue-100"
+        >
+          {showAllRows ? (
+            <EyeOff className="h-4 w-4" />
+          ) : (
+            <Eye className="h-4 w-4" />
+          )}
+          {showAllRows ? "Voir par page" : "Voir tout"}
+        </Button>
+      }
+    >
+      <div className="-mx-5 overflow-x-auto border-t border-gray-200">
+        <table className="w-full tabular-nums">
           <thead className="bg-gray-50">
             <tr>
-              <TableHeader align="left">Mois</TableHeader>
-              <TableHeader align="right">Mensualité</TableHeader>
-              <TableHeader align="right">Intérêts</TableHeader>
-              <TableHeader align="right">Capital</TableHeader>
-              <TableHeader align="right">Capital restant</TableHeader>
-              <TableHeader align="right">Somme remboursée</TableHeader>
+              <TableHeader align="left" className="px-4">
+                Mois
+              </TableHeader>
+              <TableHeader align="right" className="px-4">
+                Mensualité
+              </TableHeader>
+              <TableHeader align="right" className="px-4">
+                Intérêts
+              </TableHeader>
+              <TableHeader align="right" className="px-4">
+                Capital
+              </TableHeader>
+              <TableHeader align="right" className="px-4">
+                Capital restant dû
+              </TableHeader>
+              <TableHeader align="right" className="px-4">
+                Total remboursé
+              </TableHeader>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="divide-y divide-gray-200 bg-white">
             {currentRows.map((row, index) => (
               <tr
                 key={row.month}
                 className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
               >
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                <td className={`${CELL} font-medium text-gray-900`}>
                   {row.month}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-medium">
+                <td className={`${CELL} text-end font-medium text-gray-900`}>
                   {formatCurrency(row.monthlyPayment)}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600 text-right">
+                <td className={`${CELL} text-end text-interest-strong`}>
                   {formatCurrency(row.interestPayment)}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600 text-right">
+                <td className={`${CELL} text-end text-capital-strong`}>
                   {formatCurrency(row.principalPayment)}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-medium">
+                <td className={`${CELL} text-end font-medium text-gray-900`}>
                   {formatCurrency(row.remainingBalance)}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                <td className={`${CELL} text-end text-gray-900`}>
                   {formatCurrency(row.cumulativePayment)}
                 </td>
               </tr>
@@ -103,61 +119,53 @@ const AmortizationTable = ({ schedule }: Props) => {
           </tbody>
           <tfoot className="bg-gray-100">
             <tr>
-              <td className="px-6 py-4 text-sm font-bold text-gray-900">
-                Total
-              </td>
-              <td className="px-6 py-4 text-sm font-bold text-gray-900 text-right">
+              <td className={`${CELL} font-bold text-gray-900`}>Total</td>
+              <td className={`${CELL} text-end font-bold text-gray-900`}>
                 {formatCurrency(totalPrincipal + totalInterest)}
               </td>
-              <td className="px-6 py-4 text-sm font-bold text-red-600 text-right">
+              <td className={`${CELL} text-end font-bold text-interest-strong`}>
                 {formatCurrency(totalInterest)}
               </td>
-              <td className="px-6 py-4 text-sm font-bold text-green-600 text-right">
+              <td className={`${CELL} text-end font-bold text-capital-strong`}>
                 {formatCurrency(totalPrincipal)}
               </td>
-              <td className="px-6 py-4 text-sm font-bold text-gray-900 text-right">
-                -
-              </td>
-              <td className="px-6 py-4 text-sm font-bold text-gray-900 text-right">
-                -
-              </td>
+              <td className={`${CELL} text-end font-bold text-gray-900`}>—</td>
+              <td className={`${CELL} text-end font-bold text-gray-900`}>—</td>
             </tr>
           </tfoot>
         </table>
       </div>
 
-      {!showAllRows && totalPages > 1 && (
-        <div className="px-6 py-4 border-t border-gray-200">
-          <div className="flex items-center justify-between">
-            <div className="text-sm text-gray-700">
-              Page {currentPage + 1} sur {totalPages}
-              <span className="ml-2 text-gray-500">
-                ({startIndex + 1}-{Math.min(endIndex, schedule.length)} sur{" "}
-                {schedule.length})
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={goToPrevPage}
-                disabled={currentPage === 0}
-                className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <ChevronLeft className="w-4 h-4" />
-                Précédent
-              </button>
-              <button
-                onClick={goToNextPage}
-                disabled={currentPage === totalPages - 1}
-                className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Suivant
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
+      {!showAllRows && totalPages > 1 ? (
+        <div className="-mx-5 flex flex-wrap items-center justify-between gap-3 border-t border-gray-200 px-5 py-4">
+          <p className="text-sm text-gray-700 tabular-nums">
+            Page {currentPage + 1} sur {totalPages}
+            <span className="ms-2 text-gray-500">
+              ({startIndex + 1}–{Math.min(endIndex, schedule.length)} sur{" "}
+              {schedule.length})
+            </span>
+          </p>
+          <div className="flex items-center gap-3">
+            <Button
+              onClick={goToPrevPage}
+              disabled={currentPage === 0}
+              className={`${PAGE_BUTTON} ps-2.5`}
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Précédent
+            </Button>
+            <Button
+              onClick={goToNextPage}
+              disabled={currentPage === totalPages - 1}
+              className={`${PAGE_BUTTON} pe-2.5`}
+            >
+              Suivant
+              <ChevronRight className="h-4 w-4" />
+            </Button>
           </div>
         </div>
-      )}
-    </div>
+      ) : null}
+    </Card>
   );
 };
 

@@ -1,1 +1,12 @@
 @import "tailwindcss";
+
+@theme static {
+  --color-capital: var(--color-emerald-600);
+  --color-capital-strong: var(--color-emerald-700);
+  --color-interest: var(--color-rose-600);
+  --color-interest-strong: var(--color-rose-700);
+
+  --shadow-card:
+    0 0 0 1px oklch(0 0 0 / 0.06), 0 1px 2px -1px oklch(0 0 0 / 0.06),
+    0 2px 4px 0 oklch(0 0 0 / 0.04);
+}
