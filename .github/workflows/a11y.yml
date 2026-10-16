@@ -1,0 +1,20 @@
+name: a11y
+on:
+  pull_request:
+
+jobs:
+  a11y:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+      - run: yarn install --frozen-lockfile
+
+      - name: ESLint (jsx-a11y)
+        run: yarn eslint . --max-warnings 0
+
+      - name: Tests composants
+        run: yarn vitest run
