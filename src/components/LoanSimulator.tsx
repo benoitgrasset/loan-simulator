@@ -214,13 +214,17 @@ const LoanSimulator = () => {
             step={1000}
           />
         </div>
-        <ValueRow
-          className="mt-4"
-          label="Montant à financer"
-          hint={`apport après frais : ${formatCurrency(netDownPayment)}`}
-          value={formatCurrency(amountToFinance)}
-          tone="accent"
-        />
+        <div className="mt-4 space-y-2">
+          <ValueRow
+            label="Montant à financer"
+            value={formatCurrency(amountToFinance)}
+            tone="accent"
+          />
+          <ValueRow
+            label="Apport après frais"
+            value={formatCurrency(netDownPayment)}
+          />
+        </div>
       </Card>
       <PropertyFeesSettings
         open={feesSettingsOpen}
@@ -346,6 +350,7 @@ const LoanSimulator = () => {
                 label="Frais de notaire"
                 hint={`${PROPERTY_TYPE_LABEL[propertyType]}, ${formatRate(notaryRate)}`}
                 value={formatCurrency(notaryFees)}
+                tone="accent"
               />
               <ValueRow
                 label="Frais de courtier"

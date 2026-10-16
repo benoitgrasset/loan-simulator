@@ -22,9 +22,11 @@ export const ValueRow = ({
       className,
     )}
   >
-    <span className="text-sm text-gray-700">
-      {label}
-      {hint ? <span className="text-gray-500"> · {hint}</span> : null}
+    <span className="min-w-0">
+      <span className="block text-sm text-gray-700">{label}</span>
+      {hint ? (
+        <span className="mt-0.5 block text-sm text-gray-500">{hint}</span>
+      ) : null}
     </span>
     <span
       className={cn(
