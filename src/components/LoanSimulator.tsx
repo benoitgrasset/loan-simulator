@@ -61,8 +61,16 @@ const LoanSimulator = () => {
   >(() => ({ ...BROKER_FEES }));
   const [feesSettingsOpen, setFeesSettingsOpen] = useState(false);
 
-  // Montant à financer (hors apport), emprunté en totalité
-  const amountToFinance = Math.max(propertyValue - downPayment, 0);
+  const notaryRate = notaryRates[propertyType];
+  const brokerFees = brokerFeesByType[propertyType];
+  const notaryFees = (propertyValue * notaryRate) / 100;
+  const totalFees =
+    works + guaranteeFees + applicationFees + notaryFees + brokerFees;
+  const totalProjectCost = propertyValue + totalFees;
+
+  // Les frais sont payés par l’apport : seul le reliquat réduit l’emprunt
+  const netDownPayment = downPayment - totalFees;
+  const amountToFinance = Math.max(propertyValue - netDownPayment, 0);
   // Part empruntée à 0 % (PTZ), plafonnée au montant à financer
   const ptzAmount = Math.min(amountToFinance, ptz);
   // Part empruntée au taux du crédit
@@ -94,19 +102,10 @@ const LoanSimulator = () => {
   const totalMonthlyCost =
     monthlyPayment + monthlyPropertyTax + monthlyCharges + edf;
 
-  // Calcul des frais
-  const notaryRate = notaryRates[propertyType];
-  const brokerFees = brokerFeesByType[propertyType];
   const propertyTypeHints: Record<PropertyType, string> = {
     Neuf: `Frais de notaire : ${formatRate(notaryRates.Neuf)}\nFrais de courtier : ${formatCurrency(brokerFeesByType.Neuf)}`,
     Ancien: `Frais de notaire : ${formatRate(notaryRates.Ancien)}\nFrais de courtier : ${formatCurrency(brokerFeesByType.Ancien)}`,
   };
-  const notaryFees = (propertyValue * notaryRate) / 100;
-
-  // Calcul du total des frais
-  const totalFees =
-    works + guaranteeFees + applicationFees + notaryFees + brokerFees;
-  const totalProjectCost = propertyValue + totalFees;
 
   return (
     <div className="space-y-6">
@@ -193,6 +192,7 @@ const LoanSimulator = () => {
         <ValueRow
           className="mt-4"
           label="Montant à financer"
+          hint={`apport après frais : ${formatCurrency(netDownPayment)}`}
           value={formatCurrency(amountToFinance)}
           tone="accent"
         />
@@ -324,7 +324,7 @@ const LoanSimulator = () => {
               title="Aucun emprunt à simuler"
               description={
                 amountToFinance === 0
-                  ? "Votre apport couvre la valeur du bien. Réduisez l’apport pour afficher le plan d’amortissement."
+                  ? "Votre apport couvre le bien et les frais. Réduisez l’apport pour afficher le plan d’amortissement."
                   : "Indiquez une durée de prêt d’au moins 1 an pour afficher le plan d’amortissement."
               }
             />
