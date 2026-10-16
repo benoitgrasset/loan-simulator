@@ -35,6 +35,10 @@ const AmortizationTable = ({ schedule }: Props) => {
     (sum, row) => sum + row.principalPayment,
     0,
   );
+  const totalMonthly = schedule.reduce(
+    (sum, row) => sum + row.monthlyPayment,
+    0,
+  );
 
   const goToNextPage = () => {
     if (currentPage < totalPages - 1) {
@@ -121,7 +125,7 @@ const AmortizationTable = ({ schedule }: Props) => {
             <tr>
               <td className={`${CELL} font-bold text-gray-900`}>Total</td>
               <td className={`${CELL} text-end font-bold text-gray-900`}>
-                {formatCurrency(totalPrincipal + totalInterest)}
+                {formatCurrency(totalMonthly)}
               </td>
               <td className={`${CELL} text-end font-bold text-interest-strong`}>
                 {formatCurrency(totalInterest)}

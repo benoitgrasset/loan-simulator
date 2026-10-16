@@ -1,5 +1,6 @@
 export const DURATION = 25; // Durée du crédit en années
 export const DEFAULT_INTEREST_RATE = 3.7; // Taux d'intérêt en %
+export const DEFAULT_INSURANCE_RATE = 0.35; // Taux d'assurance emprunteur annuel, en % du capital emprunté
 export const DEFAULT_PROPERTY_VALUE = 337000; // Valeur du bien en €
 export const DEFAULT_DOWN_PAYMENT = 140000; // Apport en €
 export const DEFAULT_MONTHLY_CHARGES = 360; // Frais mensuels en €

@@ -4,6 +4,7 @@ import {
   BROKER_FEES,
   DEFAULT_APPLICATION_FEES,
   DEFAULT_DOWN_PAYMENT,
+  DEFAULT_INSURANCE_RATE,
   DEFAULT_EDF,
   DEFAULT_GUARANTEE_FEES,
   DEFAULT_MONTHLY_CHARGES,
@@ -31,6 +32,13 @@ import { StatGroup, StatTile } from "./ui/StatTile";
 import { ValueRow } from "./ui/ValueRow";
 
 const DEFAULT_PROPERTY_TYPE: PropertyType = "Ancien";
+
+type InsuranceCoverage = "1 personne" | "Couple";
+
+const INSURANCE_BORROWERS: Record<InsuranceCoverage, number> = {
+  "1 personne": 1,
+  Couple: 2,
+};
 
 const PROPERTY_TYPE_LABEL: Record<PropertyType, string> = {
   Neuf: "neuf",
@@ -60,6 +68,9 @@ const LoanSimulator = () => {
     Record<PropertyType, number>
   >(() => ({ ...BROKER_FEES }));
   const [feesSettingsOpen, setFeesSettingsOpen] = useState(false);
+  const [insuranceRate, setInsuranceRate] = useState(DEFAULT_INSURANCE_RATE);
+  const [insuranceCoverage, setInsuranceCoverage] =
+    useState<InsuranceCoverage>("Couple");
 
   const notaryRate = notaryRates[propertyType];
   const brokerFees = brokerFeesByType[propertyType];
@@ -94,10 +105,24 @@ const LoanSimulator = () => {
       amortizationSchedule.reduce((sum, row) => sum + row.interestPayment, 0),
     [amortizationSchedule],
   );
-  const totalRepaid = loanAmount + totalInterest + ptzAmount;
+  const insuredBorrowers = INSURANCE_BORROWERS[insuranceCoverage];
+  const monthlyInsurance =
+    (amountToFinance * insuranceRate * insuredBorrowers) / 100 / 12;
+  const totalInsurance = monthlyInsurance * duration * 12;
+  const totalCreditCost = totalInterest + totalInsurance;
 
-  // Calcul des mensualités
-  const monthlyPayment = amortizationSchedule[0]?.monthlyPayment || 0;
+  const scheduleWithInsurance = useMemo(
+    () =>
+      amortizationSchedule.map((row) => ({
+        ...row,
+        monthlyPayment: row.monthlyPayment + monthlyInsurance,
+        cumulativePayment: row.cumulativePayment + monthlyInsurance * row.month,
+      })),
+    [amortizationSchedule, monthlyInsurance],
+  );
+
+  const monthlyLoanPayment = amortizationSchedule[0]?.monthlyPayment || 0;
+  const monthlyPayment = monthlyLoanPayment + monthlyInsurance;
   const monthlyPropertyTax = propertyTax / 12;
   const totalMonthlyCost =
     monthlyPayment + monthlyPropertyTax + monthlyCharges + edf;
@@ -128,18 +153,18 @@ const LoanSimulator = () => {
         <StatTile
           label="Mensualité"
           value={formatCurrency(monthlyPayment)}
-          hint={`Sur ${formatYears(duration)}`}
+          hint={`Dont ${formatCurrency(monthlyInsurance)} d’assurance · ${formatYears(duration)}`}
           tone="accent"
         />
         <StatTile
           label="Coût mensuel total"
           value={formatCurrency(totalMonthlyCost)}
-          hint="Mensualité, charges, électricité et taxe foncière"
+          hint="Mensualité avec assurance, charges, électricité et taxe foncière"
         />
         <StatTile
           label="Coût total du crédit"
-          value={formatCurrency(totalInterest)}
-          hint={`Total remboursé : ${formatCurrency(totalRepaid)}`}
+          value={formatCurrency(totalCreditCost)}
+          hint={`Intérêts ${formatCurrency(totalInterest)} · Assurance ${formatCurrency(totalInsurance)}`}
           tone="interest"
         />
         <StatTile
@@ -221,6 +246,29 @@ const LoanSimulator = () => {
                 symbol="%"
                 step={0.05}
               />
+              <Input
+                label="Taux d’assurance annuel"
+                value={insuranceRate}
+                onChange={setInsuranceRate}
+                symbol="%"
+                step={0.01}
+              />
+              <div>
+                <p className="mb-2 text-sm font-medium text-gray-700">
+                  Emprunteurs assurés
+                </p>
+                <RadioButtonGroup
+                  name="insuranceCoverage"
+                  label="Emprunteurs assurés"
+                  options={["1 personne", "Couple"]}
+                  value={insuranceCoverage}
+                  onChange={setInsuranceCoverage}
+                  hints={{
+                    "1 personne": "Taux appliqué une fois",
+                    Couple: "Taux doublé pour deux assurés",
+                  }}
+                />
+              </div>
               <Input
                 label="Durée du prêt"
                 value={duration}
@@ -316,8 +364,8 @@ const LoanSimulator = () => {
         <div className="min-w-0 space-y-6 lg:col-span-2">
           {amortizationSchedule.length > 0 && amountToFinance > 0 ? (
             <>
-              <LoanChart schedule={amortizationSchedule} />
-              <AmortizationTable schedule={amortizationSchedule} />
+              <LoanChart schedule={scheduleWithInsurance} />
+              <AmortizationTable schedule={scheduleWithInsurance} />
             </>
           ) : (
             <Card
