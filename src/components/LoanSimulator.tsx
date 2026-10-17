@@ -60,7 +60,9 @@ const LoanSimulator = () => {
     DEFAULT_PROPERTY_TYPE,
   );
   const [guaranteeFees, setGuaranteeFees] = useState(DEFAULT_GUARANTEE_FEES);
-  const [applicationFees, setApplicationFees] = useState(DEFAULT_APPLICATION_FEES);
+  const [applicationFees, setApplicationFees] = useState(
+    DEFAULT_APPLICATION_FEES,
+  );
   const [works, setWorks] = useState(DEFAULT_WORKS);
   const [notaryRates, setNotaryRates] = useState<Record<PropertyType, number>>(
     () => ({ ...NOTARY_RATE }),

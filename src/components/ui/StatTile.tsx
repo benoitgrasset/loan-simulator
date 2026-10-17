@@ -37,10 +37,7 @@ type GroupProps = {
 };
 
 export const StatGroup = ({ label, className, children }: GroupProps) => (
-  <section
-    aria-label={label}
-    className={cn("grid gap-4", className)}
-  >
+  <section aria-label={label} className={cn("grid gap-4", className)}>
     {children}
   </section>
 );

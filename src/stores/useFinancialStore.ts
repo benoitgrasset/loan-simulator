@@ -26,6 +26,6 @@ export const useFinancialStore = create<FinancialState>()(
     }),
     {
       name: "financial-storage", // updated storage name
-    }
-  )
+    },
+  ),
 );

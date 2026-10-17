@@ -16,5 +16,14 @@ jobs:
       - name: ESLint (jsx-a11y)
         run: yarn eslint . --max-warnings 0
 
+      - name: Prettier
+        run: yarn format:check
+
+      - name: TypeScript
+        run: yarn typecheck
+
+      - name: Build production
+        run: yarn build
+
       - name: Tests composants
         run: yarn vitest run

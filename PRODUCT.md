@@ -31,7 +31,7 @@ Confirmé :
 - Crédit : bien, apport, type neuf/ancien, PTZ, taux, durée, assurance, charges, frais (notaire, courtier, garantie, dossier, travaux).
 - Les frais diminuent l’apport ; le reliquat seul réduit l’emprunt.
 - Assurance : taux annuel sur le capital emprunté, prime constante, ×2 pour un couple.
-- Investissement Denormandie : second parcours, UI moins alignée.
+- Investissement Denormandie : second parcours ; formulaires via `Card` et `Input`, indicateurs et détail des calculs au style d’origine (icônes, couleurs).
 - Pas de backend, pas d’auth, pas d’offre bancaire.
 
 Non décidé : i18n, comptes, export PDF, comparaison multi-scénarios.

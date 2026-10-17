@@ -94,7 +94,7 @@ Interface calme, factuelle, presque bancaire mais sans marketing : fond gris cla
 
 **Caractéristiques clés :**
 
-- Stack UI partagée (`Card`, `Input`, `StatTile`, `ValueRow`) sur le parcours crédit ; Denormandie reste partiellement legacy (voir Do's and Don'ts).
+- Stack UI partagée (`Card`, `Input`, `StatTile`, `ValueRow`) sur les deux parcours ; bannière verte (Denormandie) vs bleue (crédit).
 - Tokens sémantiques dans `src/index.css` (`@theme static`) ; le reste repose sur la palette Tailwind par défaut.
 - Profondeur par ombre légère (`shadow-card`) et empilement blanc sur `gray-50`, pas de glassmorphism ni de dégradés hors bannières de parcours.
 - Icônes **Lucide**, taille 16 px dans les contrôles, 32 px dans les héros.
@@ -253,15 +253,15 @@ Composants dans `src/components/ui/`. Préférer les réutiliser plutôt que rec
 - Ne pas introduire une troisième couleur d’accent dominante sur un écran (pas de violet/orange en héros sans alignement produit).
 - Ne pas charger de police display décorative : la lisibilité des chiffres prime.
 - Ne pas dupliquer `shadow-card` : utiliser la classe Tailwind générée depuis `--shadow-card`.
-- Ne pas étendre le style « cartes colorées empilées » d’`InvestmentSimulator` sans le refactor vers les composants UI partagés (dette connue, voir README TODO).
+- Ne pas réintroduire des cartes ad hoc (`shadow-lg`, icônes décoratives dans les stats) : passer par `Card` et `StatTile`.
 - Ne pas coder les couleurs Chart.js en dur si un token `--color-*` ou sémantique existe déjà.
 
 ## Références code
 
-| Élément | Fichier |
-| --- | --- |
-| Tokens `@theme`, base, focus | `src/index.css` |
-| Fusion classes | `src/utils/tailwind.ts` (`cn` + `tailwind-merge`) |
-| Shell app | `src/App.tsx` |
-| Parcours crédit (référence UI) | `src/components/LoanSimulator.tsx` |
-| Parcours investissement (partiel) | `src/components/InvestmentSimulator.tsx` |
+| Élément                           | Fichier                                           |
+| --------------------------------- | ------------------------------------------------- |
+| Tokens `@theme`, base, focus      | `src/index.css`                                   |
+| Fusion classes                    | `src/utils/tailwind.ts` (`cn` + `tailwind-merge`) |
+| Shell app                         | `src/App.tsx`                                     |
+| Parcours crédit (référence UI)    | `src/components/LoanSimulator.tsx`                |
+| Parcours investissement (partiel) | `src/components/InvestmentSimulator.tsx`          |

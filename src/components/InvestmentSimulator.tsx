@@ -7,9 +7,12 @@ import {
   formatCurrency,
   formatPercentage,
 } from "../utils/calculations";
+import { Card } from "./ui/Card";
 import { Input } from "./ui/Input";
 
 const propertyPrice = 140000;
+
+const formCardClassName = "border-gray-100 p-6 shadow-lg";
 
 const InvestmentSimulator = () => {
   const { duration, setDuration, interestRate, setInterestRate } =
@@ -62,11 +65,10 @@ const InvestmentSimulator = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-green-600 to-green-800 text-white p-6 rounded-xl">
-        <div className="flex items-center gap-3 mb-2">
-          <Building2 className="w-8 h-8" />
-          <h1 className="text-2xl font-bold">
+      <div className="rounded-xl bg-gradient-to-r from-green-600 to-green-800 p-6 text-white">
+        <div className="mb-2 flex items-center gap-3">
+          <Building2 className="h-8 w-8 shrink-0" />
+          <h1 className="text-2xl font-bold tracking-[-0.01em] text-balance">
             Simulation Investissement De Normandie
           </h1>
         </div>
@@ -75,155 +77,105 @@ const InvestmentSimulator = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Formulaires de saisie */}
-        <div className="lg:col-span-1 space-y-6">
-          {/* Bien immobilier */}
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">
-              Bien immobilier
-            </h2>
-
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="space-y-6 lg:col-span-1">
+          <Card title="Bien immobilier" className={formCardClassName}>
             <div className="space-y-4">
-              <div>
-                <Input
-                  label="Prix du bien"
-                  value={investmentData.propertyPrice}
-                  onChange={(value) =>
-                    handleInputChange("propertyPrice", value)
-                  }
-                  symbol="€"
-                />
-              </div>
-
-              <div>
-                <Input
-                  label="Loyer mensuel"
-                  value={investmentData.monthlyRent}
-                  onChange={(value) => handleInputChange("monthlyRent", value)}
-                  symbol="€/mois"
-                />
-              </div>
-
-              <div>
-                <Input
-                  label="Taxe foncière annuelle"
-                  value={investmentData.propertyTax}
-                  onChange={(value) => handleInputChange("propertyTax", value)}
-                  symbol="€/an"
-                />
-              </div>
+              <Input
+                label="Prix du bien"
+                value={investmentData.propertyPrice}
+                onChange={(value) => handleInputChange("propertyPrice", value)}
+                symbol="€"
+              />
+              <Input
+                label="Loyer mensuel"
+                value={investmentData.monthlyRent}
+                onChange={(value) => handleInputChange("monthlyRent", value)}
+                symbol="€/mois"
+              />
+              <Input
+                label="Taxe foncière annuelle"
+                value={investmentData.propertyTax}
+                onChange={(value) => handleInputChange("propertyTax", value)}
+                symbol="€/an"
+              />
             </div>
-          </div>
+          </Card>
 
-          {/* Financement */}
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">
-              Financement
-            </h2>
-
+          <Card title="Financement" className={formCardClassName}>
             <div className="space-y-4">
-              <div>
-                <Input
-                  label="Montant emprunté"
-                  value={investmentData.loanAmount}
-                  onChange={(value) => handleInputChange("loanAmount", value)}
-                  symbol="€"
-                />
-              </div>
-
-              <div>
-                <Input
-                  label="Taux d’intérêt"
-                  value={investmentData.interestRate}
-                  onChange={(value) => handleInputChange("interestRate", value)}
-                  symbol="%"
-                  step={0.05}
-                />
-              </div>
-
-              <div>
-                <Input
-                  label="Durée"
-                  value={investmentData.duration}
-                  onChange={(value) => handleInputChange("duration", value)}
-                  symbol="ans"
-                />
-              </div>
+              <Input
+                label="Montant emprunté"
+                value={investmentData.loanAmount}
+                onChange={(value) => handleInputChange("loanAmount", value)}
+                symbol="€"
+              />
+              <Input
+                label="Taux d’intérêt"
+                value={investmentData.interestRate}
+                onChange={(value) => handleInputChange("interestRate", value)}
+                symbol="%"
+                step={0.05}
+              />
+              <Input
+                label="Durée"
+                value={investmentData.duration}
+                onChange={(value) => handleInputChange("duration", value)}
+                symbol="ans"
+              />
             </div>
-          </div>
+          </Card>
 
-          {/* Frais et avantages */}
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">
-              Frais & Avantages
-            </h2>
-
+          <Card title="Frais & Avantages" className={formCardClassName}>
             <div className="space-y-4">
-              <div>
-                <Input
-                  label="Travaux"
-                  value={investmentData.renovationCosts}
-                  onChange={(value) =>
-                    handleInputChange("renovationCosts", value)
-                  }
-                  symbol="€"
-                />
-              </div>
-
-              <div>
-                <Input
-                  label="Frais de notaire"
-                  value={investmentData.notaryFees}
-                  onChange={(value) => handleInputChange("notaryFees", value)}
-                  symbol="€"
-                />
-              </div>
-
-              <div>
-                <Input
-                  label="Frais de dossier"
-                  value={investmentData.loanFees}
-                  onChange={(value) => handleInputChange("loanFees", value)}
-                  symbol="€"
-                />
-              </div>
-
-              <div>
-                <Input
-                  label="Commission cabinet / Frais de courtage"
-                  value={investmentData.cabinetCommission}
-                  onChange={(value) =>
-                    handleInputChange("cabinetCommission", value)
-                  }
-                  symbol="€"
-                />
-              </div>
-
-              <div>
-                <Input
-                  label="Réduction d’impôts"
-                  value={investmentData.taxReduction}
-                  onChange={(value) => handleInputChange("taxReduction", value)}
-                  symbol="€"
-                />
-              </div>
+              <Input
+                label="Travaux"
+                value={investmentData.renovationCosts}
+                onChange={(value) =>
+                  handleInputChange("renovationCosts", value)
+                }
+                symbol="€"
+              />
+              <Input
+                label="Frais de notaire"
+                value={investmentData.notaryFees}
+                onChange={(value) => handleInputChange("notaryFees", value)}
+                symbol="€"
+              />
+              <Input
+                label="Frais de dossier"
+                value={investmentData.loanFees}
+                onChange={(value) => handleInputChange("loanFees", value)}
+                symbol="€"
+              />
+              <Input
+                label="Commission cabinet / Frais de courtage"
+                value={investmentData.cabinetCommission}
+                onChange={(value) =>
+                  handleInputChange("cabinetCommission", value)
+                }
+                symbol="€"
+              />
+              <Input
+                label="Réduction d’impôts"
+                value={investmentData.taxReduction}
+                onChange={(value) => handleInputChange("taxReduction", value)}
+                symbol="€"
+              />
             </div>
-          </div>
+          </Card>
         </div>
 
-        {/* Résultats */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Indicateurs clés */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-              <div className="flex items-center gap-3 mb-4">
-                <DollarSign className="w-6 h-6 text-green-600" />
+        <div className="space-y-6 lg:col-span-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
+              <div className="mb-4 flex items-center gap-3">
+                <DollarSign className="h-6 w-6 text-green-600" />
                 <h3 className="text-lg font-semibold text-gray-800">
                   Cash-flow mensuel
                 </h3>
               </div>
-              <div className="text-3xl font-bold text-green-600 mb-2">
+              <div className="mb-2 text-3xl font-bold text-green-600">
                 {formatCurrency(profitability.monthlyNetCashFlow)}
               </div>
               <p className="text-sm text-gray-600">
@@ -231,14 +183,14 @@ const InvestmentSimulator = () => {
               </p>
             </div>
 
-            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-              <div className="flex items-center gap-3 mb-4">
-                <TrendingUp className="w-6 h-6 text-blue-600" />
+            <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
+              <div className="mb-4 flex items-center gap-3">
+                <TrendingUp className="h-6 w-6 text-blue-600" />
                 <h3 className="text-lg font-semibold text-gray-800">
                   Rendement net
                 </h3>
               </div>
-              <div className="text-3xl font-bold text-blue-600 mb-2">
+              <div className="mb-2 text-3xl font-bold text-blue-600">
                 {formatPercentage(profitability.netYield)}
               </div>
               <p className="text-sm text-gray-600">
@@ -246,14 +198,14 @@ const InvestmentSimulator = () => {
               </p>
             </div>
 
-            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-              <div className="flex items-center gap-3 mb-4">
-                <PieChart className="w-6 h-6 text-purple-600" />
+            <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
+              <div className="mb-4 flex items-center gap-3">
+                <PieChart className="h-6 w-6 text-purple-600" />
                 <h3 className="text-lg font-semibold text-gray-800">
                   ROI total
                 </h3>
               </div>
-              <div className="text-3xl font-bold text-purple-600 mb-2">
+              <div className="mb-2 text-3xl font-bold text-purple-600">
                 {formatPercentage(profitability.roi)}
               </div>
               <p className="text-sm text-gray-600">
@@ -261,14 +213,14 @@ const InvestmentSimulator = () => {
               </p>
             </div>
 
-            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-              <div className="flex items-center gap-3 mb-4">
-                <Building2 className="w-6 h-6 text-orange-600" />
+            <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
+              <div className="mb-4 flex items-center gap-3">
+                <Building2 className="h-6 w-6 text-orange-600" />
                 <h3 className="text-lg font-semibold text-gray-800">
                   Investissement initial
                 </h3>
               </div>
-              <div className="text-3xl font-bold text-orange-600 mb-2">
+              <div className="mb-2 text-3xl font-bold text-orange-600">
                 {formatCurrency(initialInvestment)}
               </div>
               <p className="text-sm text-gray-600">
@@ -277,15 +229,14 @@ const InvestmentSimulator = () => {
             </div>
           </div>
 
-          {/* Détail des calculs */}
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+          <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
+            <h3 className="mb-4 text-lg font-semibold text-gray-800">
               Détail des calculs
             </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div>
-                <h4 className="font-medium text-gray-700 mb-3">
+                <h4 className="mb-3 font-medium text-gray-700">
                   Revenus mensuels
                 </h4>
                 <div className="space-y-2 text-sm">
@@ -295,28 +246,11 @@ const InvestmentSimulator = () => {
                       {formatCurrency(investmentData.monthlyRent)}
                     </span>
                   </div>
-                  {/* <div className="flex justify-between">
-                    <span className="text-gray-600">Réduction d'impôts</span>
-                    <span className="font-medium">
-                      {formatCurrency(investmentData.taxReduction / 12)}
-                    </span>
-                  </div> */}
                 </div>
-
-                {/* <div className="border-t pt-2 flex justify-between font-medium">
-                  <span>Total</span>
-                  <span>
-                    {formatCurrency(
-                      investmentData.monthlyRent -
-                        profitability.monthlyPayment -
-                        investmentData.propertyTax / 12
-                    )}
-                  </span>
-                </div> */}
               </div>
 
               <div>
-                <h4 className="font-medium text-gray-700 mb-3">
+                <h4 className="mb-3 font-medium text-gray-700">
                   Charges mensuelles
                 </h4>
                 <div className="space-y-2 text-sm">
@@ -332,7 +266,7 @@ const InvestmentSimulator = () => {
                       {formatCurrency(investmentData.propertyTax / 12)}
                     </span>
                   </div>
-                  <div className="border-t pt-2 flex justify-between font-medium">
+                  <div className="flex justify-between border-t pt-2 font-medium">
                     <span>Total charges</span>
                     <span>
                       {formatCurrency(
@@ -345,12 +279,11 @@ const InvestmentSimulator = () => {
               </div>
 
               <div className="md:col-span-2">
-                <h4 className="font-medium text-gray-700 mb-3">
+                <h4 className="mb-3 font-medium text-gray-700">
                   Investissement initial
                 </h4>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    {/* prix du bien - montant emprunté */}
                     <span className="text-gray-600">Apport personnel</span>
                     <span className="font-medium">
                       {formatCurrency(
@@ -384,12 +317,12 @@ const InvestmentSimulator = () => {
                     </span>
                   </div>
                   <div className="flex justify-between text-green-600">
-                    <span>Réduction d'impôts</span>
+                    <span>Réduction d’impôts</span>
                     <span className="font-medium">
                       -{formatCurrency(investmentData.taxReduction)}
                     </span>
                   </div>
-                  <div className="border-t pt-2 flex justify-between font-medium text-lg">
+                  <div className="flex justify-between border-t pt-2 text-lg font-medium">
                     <span>Total investissement</span>
                     <span>{formatCurrency(initialInvestment)}</span>
                   </div>
