@@ -6,6 +6,13 @@
   --color-interest: var(--color-rose-600);
   --color-interest-strong: var(--color-rose-700);
 
+  --color-chart-loan: var(--color-blue-700);
+  --color-chart-insurance-monthly: var(--color-blue-300);
+  --color-chart-insurance-total: var(--color-rose-300);
+  --color-chart-charges: var(--color-amber-500);
+  --color-chart-energy: var(--color-teal-500);
+  --color-chart-other: var(--color-gray-400);
+
   --shadow-card:
     0 0 0 1px oklch(0 0 0 / 0.06), 0 1px 2px -1px oklch(0 0 0 / 0.06),
     0 2px 4px 0 oklch(0 0 0 / 0.04);

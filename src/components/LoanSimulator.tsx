@@ -22,6 +22,7 @@ import {
   generateAmortizationSchedule,
 } from "../utils/calculations";
 import AmortizationTable from "./AmortizationTable";
+import CostPieChart from "./CostPieChart";
 import LoanChart from "./LoanChart";
 import { PropertyFeesSettings } from "./PropertyFeesSettings";
 import { Button } from "./ui/Button";
@@ -367,6 +368,78 @@ const LoanSimulator = () => {
         </div>
 
         <div className="min-w-0 space-y-6 lg:col-span-2">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <CostPieChart
+              title="Charges mensuelles"
+              description="Ce que vous payez chaque mois"
+              totalLabel="Par mois"
+              slices={[
+                {
+                  label: "Crédit",
+                  value: monthlyLoanPayment,
+                  color: "--color-chart-loan",
+                },
+                {
+                  label: "Assurance",
+                  value: monthlyInsurance,
+                  color: "--color-chart-insurance-monthly",
+                },
+                {
+                  label: "Charges",
+                  value: monthlyCharges,
+                  color: "--color-chart-charges",
+                },
+                {
+                  label: "Électricité",
+                  value: edf,
+                  color: "--color-chart-energy",
+                },
+                {
+                  label: "Taxe foncière",
+                  value: monthlyPropertyTax,
+                  color: "--color-chart-other",
+                },
+              ]}
+            />
+            <CostPieChart
+              title="Coûts du projet"
+              description="Hors prix du bien, sur toute la durée"
+              totalLabel="Total"
+              slices={[
+                {
+                  label: "Intérêts",
+                  value: totalInterest,
+                  color: "--color-interest",
+                },
+                {
+                  label: "Assurance",
+                  value: totalInsurance,
+                  color: "--color-chart-insurance-total",
+                },
+                {
+                  label: "Frais de notaire",
+                  value: notaryFees,
+                  color: "--color-chart-loan",
+                },
+                {
+                  label: "Travaux",
+                  value: works,
+                  color: "--color-chart-charges",
+                },
+                {
+                  label: "Frais de courtier",
+                  value: brokerFees,
+                  color: "--color-chart-energy",
+                },
+                {
+                  label: "Garantie et dossier",
+                  value: guaranteeFees + applicationFees,
+                  color: "--color-chart-other",
+                },
+              ]}
+            />
+          </div>
+
           {amortizationSchedule.length > 0 && amountToFinance > 0 ? (
             <>
               <LoanChart schedule={scheduleWithInsurance} />

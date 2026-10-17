@@ -9,6 +9,10 @@ vi.mock("./components/LoanChart", () => ({
   default: () => <div>Graphiques</div>,
 }));
 
+vi.mock("react-chartjs-2", () => ({
+  Doughnut: () => null,
+}));
+
 test("la page crédit n’a pas de violation a11y", async () => {
   const { container } = render(<App />);
   await assertNoA11yViolations(container);
