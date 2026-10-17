@@ -6,8 +6,8 @@
 - [ ] Couvrir les calculs par des tests unitaires (amortissement, PTZ, frais sur l’apport, assurance)
 - [ ] Aligner `InvestmentSimulator` sur les composants `Card`, `Input`, `StatTile`
 - [ ] Rendre les graphiques accessibles (aujourd’hui mockés dans les tests a11y)
-- [ ] Installer le skill `better-accessibility` (cité par `better-interface`, absent du dépôt)
-- [ ] Capturer le produit dans `PRODUCT.md` / `DESIGN.md` (`/impeccable init`)
+- [x] Capturer le produit dans `PRODUCT.md`
+- [x] Capturer le système visuel dans `DESIGN.md`
 - [ ] Persister tout le formulaire crédit (seul le taux et la durée le sont, via Zustand)
 
 ## Description
