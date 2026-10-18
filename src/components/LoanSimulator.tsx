@@ -86,7 +86,8 @@ const LoanSimulator = () => {
   const netDownPayment = downPayment - totalFees;
   const amountToFinance = Math.max(propertyValue - netDownPayment, 0);
   // Part empruntée à 0 % (PTZ), plafonnée au montant à financer
-  const ptzAmount = Math.min(amountToFinance, ptz);
+  const ptzAmount =
+    propertyType === "Neuf" ? Math.min(amountToFinance, ptz) : 0;
   // Part empruntée au taux du crédit
   const loanAmount = amountToFinance - ptzAmount;
 
@@ -283,13 +284,15 @@ const LoanSimulator = () => {
                 symbol="ans"
                 step={1}
               />
-              <Input
-                label="Prêt à taux zéro (PTZ)"
-                value={ptz}
-                onChange={(value) => setPtz(value)}
-                symbol="€"
-                step={5000}
-              />
+              {propertyType === "Neuf" && (
+                <Input
+                  label="Prêt à taux zéro (PTZ)"
+                  value={ptz}
+                  onChange={(value) => setPtz(value)}
+                  symbol="€"
+                  step={5000}
+                />
+              )}
             </div>
             <ValueRow
               className="mt-6"
