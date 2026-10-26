@@ -1,5 +1,8 @@
 import {
   AmortizationRow,
+  BuyVsRentInputs,
+  BuyVsRentResult,
+  BuyVsRentYearPoint,
   InvestmentData,
   InvestmentResult,
   LoanData,
@@ -191,4 +194,92 @@ export function formatYears(value: number): string {
 
 export function formatPercentage(value: number): string {
   return `${value.toFixed(2)}%`;
+}
+
+function monthlyRateFromAnnual(annualPercent: number): number {
+  return annualPercent / 100 / 12;
+}
+
+/**
+ * Compare le patrimoine net acheteur (équité du bien) vs locataire (épargne placée).
+ * Les frais d’acquisition sont prélevés sur l’apport côté acheteur ; le locataire place
+ * l’apport initial, qui est rémunéré chaque mois, puis reçoit l’écart de dépense logement
+ * (coût propriétaire − loyer) sans déduire le loyer deux fois.
+ */
+export function calculateBuyVsRent(params: BuyVsRentInputs): BuyVsRentResult {
+  const {
+    propertyPrice,
+    downPayment,
+    upfrontFees,
+    interestRate,
+    loanDurationYears,
+    horizonYears,
+    monthlyRent,
+    monthlyOwnerCosts,
+    savingsReturnRate,
+    propertyAppreciationRate,
+  } = params;
+
+  const netDownPayment = downPayment - upfrontFees;
+  const loanAmount = Math.max(propertyPrice - netDownPayment, 0);
+  const schedule =
+    loanAmount > 0
+      ? generateAmortizationSchedule({
+          amount: loanAmount,
+          interestRate,
+          duration: loanDurationYears,
+        })
+      : [];
+
+  const savingsMonthly = monthlyRateFromAnnual(savingsReturnRate);
+  const appreciationMonthly = monthlyRateFromAnnual(propertyAppreciationRate);
+
+  const firstMortgage = schedule[0]?.monthlyPayment ?? 0;
+  const monthlyOwnerTotal = firstMortgage + monthlyOwnerCosts;
+
+  const totalMonths = Math.max(1, Math.round(horizonYears * 12));
+  const points: BuyVsRentYearPoint[] = [];
+
+  let propertyValue = propertyPrice;
+  let renterPortfolio = downPayment;
+  let crossoverYear: number | null = null;
+
+  const pushYearPoint = (year: number, buyNetWorth: number) => {
+    points.push({
+      year,
+      buyNetWorth,
+      rentNetWorth: renterPortfolio,
+    });
+    if (crossoverYear === null && year > 0 && buyNetWorth > renterPortfolio) {
+      crossoverYear = year;
+    }
+  };
+
+  pushYearPoint(0, propertyValue - loanAmount);
+
+  for (let month = 1; month <= totalMonths; month++) {
+    propertyValue *= 1 + appreciationMonthly;
+
+    const scheduleRow = schedule[month - 1];
+    const mortgagePayment = scheduleRow?.monthlyPayment ?? 0;
+    const remainingLoan = scheduleRow?.remainingBalance ?? 0;
+    const ownerMonthly = mortgagePayment + monthlyOwnerCosts;
+
+    renterPortfolio *= 1 + savingsMonthly;
+    renterPortfolio += ownerMonthly - monthlyRent;
+
+    const buyNetWorth = propertyValue - remainingLoan;
+
+    if (month % 12 === 0) {
+      pushYearPoint(month / 12, buyNetWorth);
+    }
+  }
+
+  return {
+    points,
+    crossoverYear,
+    monthlyOwnerTotal,
+    monthlyRent,
+    loanAmount,
+  };
 }

@@ -1,11 +1,14 @@
-import { Building2, Calculator } from "lucide-react";
+import { Building2, Calculator, Scale } from "lucide-react";
 import { useState } from "react";
+import BuyVsRentSimulator from "./components/BuyVsRentSimulator";
 import InvestmentSimulator from "./components/InvestmentSimulator";
 import LoanSimulator from "./components/LoanSimulator";
 import TabButton from "./components/ui/TabButton";
 
+type AppTab = "loan" | "investment" | "buyVsRent";
+
 function App() {
-  const [activeTab, setActiveTab] = useState<"loan" | "investment">("loan");
+  const [activeTab, setActiveTab] = useState<AppTab>("loan");
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -33,13 +36,23 @@ function App() {
             >
               Investissement Denormandie
             </TabButton>
+            <TabButton
+              isActive={activeTab === "buyVsRent"}
+              onClick={() => setActiveTab("buyVsRent")}
+              icon={Scale}
+              activeColor="teal"
+            >
+              Acheter vs louer
+            </TabButton>
           </div>
         </div>
       </nav>
 
       {/* Contenu principal */}
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        {activeTab === "loan" ? <LoanSimulator /> : <InvestmentSimulator />}
+        {activeTab === "loan" && <LoanSimulator />}
+        {activeTab === "investment" && <InvestmentSimulator />}
+        {activeTab === "buyVsRent" && <BuyVsRentSimulator />}
       </main>
 
       {/* Footer */}

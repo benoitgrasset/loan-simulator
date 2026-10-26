@@ -3,7 +3,7 @@ import React from "react";
 import { cn } from "../../utils/tailwind";
 import { Button } from "./Button";
 
-type ActiveColor = "blue" | "green" | "purple" | "red";
+type ActiveColor = "blue" | "green" | "purple" | "red" | "teal";
 
 interface TabButtonProps {
   isActive: boolean;
@@ -18,6 +18,7 @@ const ACTIVE_TEXT: Record<ActiveColor, string> = {
   green: "text-green-700",
   purple: "text-purple-700",
   red: "text-red-700",
+  teal: "text-teal-700",
 };
 
 const TabButton = ({

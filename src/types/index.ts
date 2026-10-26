@@ -36,3 +36,30 @@ export interface InvestmentResult {
   roi: number;
   netYield: number;
 }
+
+export interface BuyVsRentInputs {
+  propertyPrice: number;
+  downPayment: number;
+  upfrontFees: number;
+  interestRate: number;
+  loanDurationYears: number;
+  horizonYears: number;
+  monthlyRent: number;
+  monthlyOwnerCosts: number;
+  savingsReturnRate: number;
+  propertyAppreciationRate: number;
+}
+
+export interface BuyVsRentYearPoint {
+  year: number;
+  buyNetWorth: number;
+  rentNetWorth: number;
+}
+
+export interface BuyVsRentResult {
+  points: BuyVsRentYearPoint[];
+  crossoverYear: number | null;
+  monthlyOwnerTotal: number;
+  monthlyRent: number;
+  loanAmount: number;
+}

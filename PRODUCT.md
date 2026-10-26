@@ -32,6 +32,7 @@ Confirmé :
 - Les frais diminuent l’apport ; le reliquat seul réduit l’emprunt.
 - Assurance : taux annuel sur le capital emprunté, prime constante, ×2 pour un couple.
 - Investissement Denormandie : second parcours ; formulaires via `Card` et `Input`, indicateurs et détail des calculs au style d’origine (icônes, couleurs).
+- Acheter vs louer : comparaison du patrimoine net (équité du bien vs épargne placée), loyer, rémunération de l’épargne, revalorisation du bien, croisement des courbes sur un horizon donné ; taux et durée partagés avec les autres onglets.
 - Pas de backend, pas d’auth, pas d’offre bancaire.
 
 Non décidé : i18n, comptes, export PDF, comparaison multi-scénarios.

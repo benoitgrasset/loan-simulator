@@ -25,6 +25,7 @@ Simulateur financier immobilier dans le navigateur. Deux parcours :
 
 - **Crédit immobilier** : valeur du bien, apport, PTZ, taux, assurance emprunteur, charges, frais (notaire, courtier, etc.) et plan d’amortissement.
 - **Investissement Denormandie** : rentabilité d’un investissement locatif.
+- **Acheter vs louer** : patrimoine net acheteur / locataire, croisement des courbes.
 
 Les calculs sont indicatifs, pas un engagement contractuel.
 

@@ -9,8 +9,13 @@ vi.mock("./components/LoanChart", () => ({
   default: () => <div>Graphiques</div>,
 }));
 
+vi.mock("./components/BuyVsRentChart", () => ({
+  default: () => <div>Graphique acheter vs louer</div>,
+}));
+
 vi.mock("react-chartjs-2", () => ({
   Doughnut: () => null,
+  Line: () => null,
 }));
 
 test("la page crédit n’a pas de violation a11y", async () => {
@@ -25,6 +30,15 @@ test("la page investissement n’a pas de violation a11y", async () => {
   await user.click(
     screen.getByRole("button", { name: "Investissement Denormandie" }),
   );
+
+  await assertNoA11yViolations(container);
+});
+
+test("la page acheter vs louer n’a pas de violation a11y", async () => {
+  const user = userEvent.setup();
+  const { container } = render(<App />);
+
+  await user.click(screen.getByRole("button", { name: "Acheter vs louer" }));
 
   await assertNoA11yViolations(container);
 });
