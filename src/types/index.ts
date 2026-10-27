@@ -48,6 +48,7 @@ export interface BuyVsRentInputs {
   monthlyOwnerCosts: number;
   savingsReturnRate: number;
   propertyAppreciationRate: number;
+  rentAppreciationRate: number;
 }
 
 export interface BuyVsRentYearPoint {

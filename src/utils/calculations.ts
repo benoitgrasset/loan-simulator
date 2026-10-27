@@ -202,9 +202,15 @@ function monthlyRateFromAnnual(annualPercent: number): number {
 
 /**
  * Compare le patrimoine net acheteur (équité du bien) vs locataire (épargne placée).
- * Les frais d’acquisition sont prélevés sur l’apport côté acheteur ; le locataire place
- * l’apport initial, qui est rémunéré chaque mois, puis reçoit l’écart de dépense logement
- * (coût propriétaire − loyer) sans déduire le loyer deux fois.
+ * L’apport est brut (avant frais de notaire) : les frais sont déduits de l’apport pour
+ * le financement, comme sur le simulateur crédit. Le locataire place l’apport initial.
+ * Chaque mois, le locataire a le même effort logement que l’acheteur au départ
+ * (mensualité + charges, figé sur toute la durée) : loyer payé sur ce budget,
+ * surplus épargné (ou prélevé si le loyer dépasse cet effort).
+ * Loyer et valeur du bien peuvent être revalorisés (taux annuels optionnels,
+ * capitalisation mensuelle). Charges propriétaires constantes. Côté acheteur,
+ * le surplus d’effort (mensualité + charges figées moins coût réel du mois) est
+ * placé comme l’épargne locataire.
  */
 export function calculateBuyVsRent(params: BuyVsRentInputs): BuyVsRentResult {
   const {
@@ -218,6 +224,7 @@ export function calculateBuyVsRent(params: BuyVsRentInputs): BuyVsRentResult {
     monthlyOwnerCosts,
     savingsReturnRate,
     propertyAppreciationRate,
+    rentAppreciationRate,
   } = params;
 
   const netDownPayment = downPayment - upfrontFees;
@@ -232,16 +239,23 @@ export function calculateBuyVsRent(params: BuyVsRentInputs): BuyVsRentResult {
       : [];
 
   const savingsMonthly = monthlyRateFromAnnual(savingsReturnRate);
-  const appreciationMonthly = monthlyRateFromAnnual(propertyAppreciationRate);
+  const propertyAppreciationMonthly = monthlyRateFromAnnual(
+    propertyAppreciationRate,
+  );
+  const rentAppreciationMonthly = monthlyRateFromAnnual(rentAppreciationRate);
 
   const firstMortgage = schedule[0]?.monthlyPayment ?? 0;
   const monthlyOwnerTotal = firstMortgage + monthlyOwnerCosts;
+  /** Effort logement figé (comme sur les outils type breakeven). */
+  const monthlyHousingEffort = monthlyOwnerTotal;
 
   const totalMonths = Math.max(1, Math.round(horizonYears * 12));
   const points: BuyVsRentYearPoint[] = [];
 
   let propertyValue = propertyPrice;
   let renterPortfolio = downPayment;
+  let ownerCashPortfolio = 0;
+  let currentMonthlyRent = monthlyRent;
   let crossoverYear: number | null = null;
 
   const pushYearPoint = (year: number, buyNetWorth: number) => {
@@ -258,21 +272,28 @@ export function calculateBuyVsRent(params: BuyVsRentInputs): BuyVsRentResult {
   pushYearPoint(0, propertyValue - loanAmount);
 
   for (let month = 1; month <= totalMonths; month++) {
-    propertyValue *= 1 + appreciationMonthly;
+    propertyValue *= 1 + propertyAppreciationMonthly;
 
     const scheduleRow = schedule[month - 1];
     const mortgagePayment = scheduleRow?.monthlyPayment ?? 0;
     const remainingLoan = scheduleRow?.remainingBalance ?? 0;
-    const ownerMonthly = mortgagePayment + monthlyOwnerCosts;
+    const actualOwnerMonthly = mortgagePayment + monthlyOwnerCosts;
+    const monthlyEffortSurplus = monthlyHousingEffort - actualOwnerMonthly;
 
     renterPortfolio *= 1 + savingsMonthly;
-    renterPortfolio += ownerMonthly - monthlyRent;
+    renterPortfolio += monthlyHousingEffort - currentMonthlyRent;
 
-    const buyNetWorth = propertyValue - remainingLoan;
+    ownerCashPortfolio *= 1 + savingsMonthly;
+    ownerCashPortfolio += monthlyEffortSurplus;
+
+    const buyNetWorth =
+      propertyValue - remainingLoan + ownerCashPortfolio;
 
     if (month % 12 === 0) {
       pushYearPoint(month / 12, buyNetWorth);
     }
+
+    currentMonthlyRent *= 1 + rentAppreciationMonthly;
   }
 
   return {

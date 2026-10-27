@@ -8,6 +8,7 @@ import {
   DEFAULT_PROPERTY_APPRECIATION_RATE,
   DEFAULT_PROPERTY_TAX,
   DEFAULT_PROPERTY_VALUE,
+  DEFAULT_RENT_APPRECIATION_RATE,
   DEFAULT_SAVINGS_RETURN_RATE,
   NOTARY_RATE,
   PropertyType,
@@ -43,6 +44,9 @@ const BuyVsRentSimulator = () => {
   const [propertyAppreciationRate, setPropertyAppreciationRate] = useState(
     DEFAULT_PROPERTY_APPRECIATION_RATE,
   );
+  const [rentAppreciationRate, setRentAppreciationRate] = useState(
+    DEFAULT_RENT_APPRECIATION_RATE,
+  );
   const [horizonYears, setHorizonYears] = useState(BUY_VS_RENT_HORIZON_YEARS);
 
   const notaryFees = (propertyPrice * NOTARY_RATE[propertyType]) / 100;
@@ -61,6 +65,7 @@ const BuyVsRentSimulator = () => {
         monthlyOwnerCosts,
         savingsReturnRate,
         propertyAppreciationRate,
+        rentAppreciationRate,
       }),
     [
       propertyPrice,
@@ -73,6 +78,7 @@ const BuyVsRentSimulator = () => {
       monthlyOwnerCosts,
       savingsReturnRate,
       propertyAppreciationRate,
+      rentAppreciationRate,
     ],
   );
 
@@ -120,7 +126,11 @@ const BuyVsRentSimulator = () => {
         <StatTile
           label={`Patrimoine achat (an ${lastPoint?.year ?? horizonYears})`}
           value={formatCurrency(lastPoint?.buyNetWorth ?? 0)}
-          hint={`Revalorisation ${formatRate(propertyAppreciationRate)} / an`}
+          hint={
+            propertyAppreciationRate === 0
+              ? "Valeur du bien constante"
+              : `Revalorisation ${formatRate(propertyAppreciationRate)} / an`
+          }
         />
         <StatTile
           label={`Patrimoine location (an ${lastPoint?.year ?? horizonYears})`}
@@ -156,11 +166,20 @@ const BuyVsRentSimulator = () => {
                 step={50}
               />
               <Input
+                label="Revalorisation annuelle du loyer"
+                value={rentAppreciationRate}
+                onChange={setRentAppreciationRate}
+                symbol="%"
+                step={0.1}
+                min={0}
+              />
+              <Input
                 label="Revalorisation annuelle du bien"
                 value={propertyAppreciationRate}
                 onChange={setPropertyAppreciationRate}
                 symbol="%"
                 step={0.1}
+                min={0}
               />
             </div>
             <div className="mt-4 space-y-2">
@@ -168,6 +187,10 @@ const BuyVsRentSimulator = () => {
                 label="Frais de notaire estimés"
                 hint={`Bien ${propertyType.toLowerCase()}, ${formatRate(NOTARY_RATE[propertyType])}`}
                 value={formatCurrency(notaryFees)}
+              />
+              <ValueRow
+                label="Apport après frais de notaire"
+                value={formatCurrency(downPayment - notaryFees)}
               />
               <ValueRow
                 label="Montant emprunté"
@@ -237,20 +260,24 @@ const BuyVsRentSimulator = () => {
           />
           <Card
             title="Hypothèses du modèle"
-            description="Simulation indicative : pas de fiscalité, frais de revente ni assurance emprunteur."
+            description="Loyer et prix du bien peuvent être revalorisés (réglages ci-contre, 0 % = constant). Charges propriétaires constantes. Pas de fiscalité, frais de revente ni assurance emprunteur."
           >
             <ul className="list-disc space-y-2 ps-5 text-sm text-gray-600 text-pretty">
               <li>
-                L’acheteur finance le bien avec l’apport net (après frais de
-                notaire) ; le locataire place l’apport initial au taux indiqué.
+                L’apport est saisi avant frais de notaire : ces frais sont
+                prélevés sur l’apport, et le crédit couvre le reste du prix du
+                bien. Le locataire place cet apport au taux indiqué.
               </li>
               <li>
-                L’apport est rémunéré chaque mois ; s’ajoute l’écart mensuel
-                entre le coût propriétaire (crédit + charges) et le loyer.
+                Côté location : effort mensuel figé sur la mensualité initiale +
+                charges ; le loyer est payé sur ce budget et le reste est
+                épargné (à défaut prélevé sur l’épargne si le loyer est plus
+                élevé).
               </li>
               <li>
                 Le patrimoine acheteur est l’équité du bien (valeur revalorisée
-                − capital restant dû).
+                − capital restant dû) plus l’épargne issue du surplus d’effort
+                (ex. mensualité libérée après le crédit).
               </li>
             </ul>
           </Card>

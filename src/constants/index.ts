@@ -22,5 +22,6 @@ export const BROKER_FEES: Record<PropertyType, number> = {
 
 export const DEFAULT_MONTHLY_RENT = 1600;
 export const DEFAULT_SAVINGS_RETURN_RATE = 3;
-export const DEFAULT_PROPERTY_APPRECIATION_RATE = 2;
+export const DEFAULT_PROPERTY_APPRECIATION_RATE = 1;
+export const DEFAULT_RENT_APPRECIATION_RATE = 1;
 export const BUY_VS_RENT_HORIZON_YEARS = 30;
