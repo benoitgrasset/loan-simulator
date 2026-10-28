@@ -3,6 +3,7 @@ import { useState } from "react";
 import BuyVsRentSimulator from "./components/BuyVsRentSimulator";
 import InvestmentSimulator from "./components/InvestmentSimulator";
 import LoanSimulator from "./components/LoanSimulator";
+import AppDisclaimer from "./components/ui/AppDisclaimer";
 import TabButton from "./components/ui/TabButton";
 
 type AppTab = "loan" | "investment" | "buyVsRent";
@@ -56,15 +57,12 @@ function App() {
       </main>
 
       {/* Footer */}
-      <footer className="mt-16 border-t border-gray-200 bg-white">
+      <footer className="mt-16 border-t border-gray-200 bg-white" role="contentinfo">
         <div className="mx-auto max-w-7xl px-4 py-8 text-center sm:px-6 lg:px-8">
           <p className="text-sm text-gray-600">
             Simulateur financier immobilier — outil d’aide à la décision
           </p>
-          <p className="mt-2 text-xs text-gray-500 text-pretty">
-            Les calculs sont donnés à titre indicatif et ne constituent pas un
-            engagement contractuel.
-          </p>
+          <AppDisclaimer />
         </div>
       </footer>
     </div>

@@ -17,6 +17,7 @@ import { useFinancialStore } from "../stores/useFinancialStore";
 import {
   calculateBuyVsRent,
   formatCurrency,
+  formatDurationYearsMonths,
   formatRate,
   formatYears,
 } from "../utils/calculations";
@@ -86,8 +87,8 @@ const BuyVsRentSimulator = () => {
   const monthlyGap = simulation.monthlyOwnerTotal - simulation.monthlyRent;
 
   const crossoverHint =
-    simulation.crossoverYear !== null
-      ? `L’achat devient plus avantageux en patrimoine net à partir de l’année ${simulation.crossoverYear}`
+    simulation.crossoverMonth !== null
+      ? `L’achat devient plus avantageux en patrimoine net à partir de ${formatDurationYearsMonths(simulation.crossoverMonth)}`
       : `Pas de croisement sur ${formatYears(horizonYears)}`;
 
   return (
@@ -111,8 +112,8 @@ const BuyVsRentSimulator = () => {
         <StatTile
           label="Croisement des courbes"
           value={
-            simulation.crossoverYear !== null
-              ? formatYears(simulation.crossoverYear)
+            simulation.crossoverMonth !== null
+              ? formatDurationYearsMonths(simulation.crossoverMonth)
               : "—"
           }
           hint={crossoverHint}
@@ -256,7 +257,7 @@ const BuyVsRentSimulator = () => {
         <div className="min-w-0 space-y-6 lg:col-span-2">
           <BuyVsRentChart
             points={simulation.points}
-            crossoverYear={simulation.crossoverYear}
+            crossoverMonth={simulation.crossoverMonth}
           />
           <Card
             title="Hypothèses du modèle"

@@ -59,7 +59,8 @@ export interface BuyVsRentYearPoint {
 
 export interface BuyVsRentResult {
   points: BuyVsRentYearPoint[];
-  crossoverYear: number | null;
+  /** Premier mois (1 = fin du 1er mois) où le patrimoine acheteur dépasse le locataire. */
+  crossoverMonth: number | null;
   monthlyOwnerTotal: number;
   monthlyRent: number;
   loanAmount: number;

@@ -34,6 +34,7 @@ Confirmé :
 - Investissement Denormandie : second parcours ; formulaires via `Card` et `Input`, indicateurs et détail des calculs au style d’origine (icônes, couleurs).
 - Acheter vs louer : comparaison du patrimoine net (équité du bien vs épargne placée), loyer, rémunération de l’épargne, revalorisation du bien, croisement des courbes sur un horizon donné ; taux et durée partagés avec les autres onglets.
 - Pas de backend, pas d’auth, pas d’offre bancaire.
+- Footer unique sur les trois onglets : calculs indicatifs, pas de conseil personnalisé, pas d’offre bancaire (`AppDisclaimer`).
 
 Non décidé : i18n, comptes, export PDF, comparaison multi-scénarios.
 

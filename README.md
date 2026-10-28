@@ -19,6 +19,11 @@ Pistes évoquées dans [`PRODUCT.md`](PRODUCT.md), **sans engagement** de livrai
 - **Export PDF** — partage ou archivage d’une simulation
 - **Comparaison multi-scénarios** — plusieurs hypothèses côte à côte
 
+**Qualité & confiance**
+
+- **Golden files** — un ou deux jeux de chiffres figés (crédit + acheter vs louer) pour détecter les régressions de modèle
+- **Constantes documentées** — bloc « d’où viennent les défauts » (ex. 337 k€, 190 k€) dans ce README ou dans `PRODUCT.md`, en lien avec `src/constants/index.ts`
+
 ## Description
 
 Simulateur financier immobilier dans le navigateur. Deux parcours :

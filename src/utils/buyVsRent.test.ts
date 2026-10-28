@@ -1,5 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { calculateBuyVsRent } from "./calculations";
+import {
+  calculateBuyVsRent,
+  formatDurationYearsMonths,
+} from "./calculations";
+
+describe("formatDurationYearsMonths", () => {
+  it("formate années et mois", () => {
+    expect(formatDurationYearsMonths(77)).toBe("6 ans et 5 mois");
+    expect(formatDurationYearsMonths(12)).toBe("1 an");
+    expect(formatDurationYearsMonths(5)).toBe("5 mois");
+  });
+});
 
 describe("calculateBuyVsRent", () => {
   it("fait croître le patrimoine locataire avec un taux d’épargne positif sans loyer", () => {
@@ -37,7 +48,7 @@ describe("calculateBuyVsRent", () => {
       rentAppreciationRate: 0,
     });
 
-    expect(result.crossoverYear).not.toBeNull();
+    expect(result.crossoverMonth).not.toBeNull();
     expect(result.points[0].buyNetWorth).toBeLessThan(
       result.points[0].rentNetWorth,
     );

@@ -192,6 +192,23 @@ export function formatYears(value: number): string {
   return yearsFormatter.format(value);
 }
 
+/** Durée en mois → libellé du type « 6 ans et 5 mois ». */
+export function formatDurationYearsMonths(totalMonths: number): string {
+  const years = Math.floor(totalMonths / 12);
+  const months = totalMonths % 12;
+
+  if (years === 0) {
+    return months === 1 ? "1 mois" : `${months} mois`;
+  }
+  if (months === 0) {
+    return years === 1 ? "1 an" : `${years} ans`;
+  }
+
+  const yearLabel = years === 1 ? "1 an" : `${years} ans`;
+  const monthLabel = months === 1 ? "1 mois" : `${months} mois`;
+  return `${yearLabel} et ${monthLabel}`;
+}
+
 export function formatPercentage(value: number): string {
   return `${value.toFixed(2)}%`;
 }
@@ -256,7 +273,9 @@ export function calculateBuyVsRent(params: BuyVsRentInputs): BuyVsRentResult {
   let renterPortfolio = downPayment;
   let ownerCashPortfolio = 0;
   let currentMonthlyRent = monthlyRent;
-  let crossoverYear: number | null = null;
+  let crossoverMonth: number | null = null;
+  let previousBuyNetWorth = propertyValue - loanAmount;
+  let previousRentNetWorth = downPayment;
 
   const pushYearPoint = (year: number, buyNetWorth: number) => {
     points.push({
@@ -264,9 +283,6 @@ export function calculateBuyVsRent(params: BuyVsRentInputs): BuyVsRentResult {
       buyNetWorth,
       rentNetWorth: renterPortfolio,
     });
-    if (crossoverYear === null && year > 0 && buyNetWorth > renterPortfolio) {
-      crossoverYear = year;
-    }
   };
 
   pushYearPoint(0, propertyValue - loanAmount);
@@ -289,6 +305,16 @@ export function calculateBuyVsRent(params: BuyVsRentInputs): BuyVsRentResult {
     const buyNetWorth =
       propertyValue - remainingLoan + ownerCashPortfolio;
 
+    if (
+      crossoverMonth === null &&
+      previousBuyNetWorth <= previousRentNetWorth &&
+      buyNetWorth > renterPortfolio
+    ) {
+      crossoverMonth = month;
+    }
+    previousBuyNetWorth = buyNetWorth;
+    previousRentNetWorth = renterPortfolio;
+
     if (month % 12 === 0) {
       pushYearPoint(month / 12, buyNetWorth);
     }
@@ -298,7 +324,7 @@ export function calculateBuyVsRent(params: BuyVsRentInputs): BuyVsRentResult {
 
   return {
     points,
-    crossoverYear,
+    crossoverMonth,
     monthlyOwnerTotal,
     monthlyRent,
     loanAmount,

@@ -11,7 +11,10 @@ import {
 import { useMemo } from "react";
 import { Line } from "react-chartjs-2";
 import { BuyVsRentYearPoint } from "../types";
-import { formatCurrency } from "../utils/calculations";
+import {
+  formatCurrency,
+  formatDurationYearsMonths,
+} from "../utils/calculations";
 import { readCssColor } from "../utils/colors";
 import { Card } from "./ui/Card";
 
@@ -26,7 +29,7 @@ ChartJS.register(
 
 type Props = {
   points: BuyVsRentYearPoint[];
-  crossoverYear: number | null;
+  crossoverMonth: number | null;
 };
 
 const formatAxisEuro = (value: number) => {
@@ -41,7 +44,39 @@ const formatAxisEuro = (value: number) => {
   return `${Math.round(value)} €`;
 };
 
-const BuyVsRentChart = ({ points, crossoverYear }: Props) => {
+const createCrossoverLinePlugin = (crossoverMonth: number | null) => ({
+  id: "buyVsRentCrossoverLine",
+  afterDraw: (chart: ChartJS) => {
+    if (crossoverMonth === null) return;
+
+    const xScale = chart.scales.x;
+    const yScale = chart.scales.y;
+    if (!xScale || !yScale) return;
+
+    const xYears = crossoverMonth / 12;
+    const xPixel = xScale.getPixelForValue(xYears);
+    const { ctx } = chart;
+    const lineColor = readCssColor("--color-gray-400");
+
+    ctx.save();
+    ctx.strokeStyle = lineColor;
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    ctx.moveTo(xPixel, yScale.top);
+    ctx.lineTo(xPixel, yScale.bottom);
+    ctx.stroke();
+
+    ctx.fillStyle = readCssColor("--color-gray-700");
+    ctx.font = "600 11px ui-sans-serif, system-ui, sans-serif";
+    ctx.textAlign = "center";
+    const label = formatDurationYearsMonths(crossoverMonth);
+    ctx.fillText(label, xPixel, yScale.top + 14);
+    ctx.restore();
+  },
+});
+
+const BuyVsRentChart = ({ points, crossoverMonth }: Props) => {
   const colors = useMemo(
     () => ({
       buy: readCssColor("--color-chart-buy"),
@@ -53,13 +88,14 @@ const BuyVsRentChart = ({ points, crossoverYear }: Props) => {
     [],
   );
 
+  const maxYear = points[points.length - 1]?.year ?? 0;
+
   const chartData = useMemo(
     () => ({
-      labels: points.map((p) => `An ${p.year}`),
       datasets: [
         {
           label: "Patrimoine si achat",
-          data: points.map((p) => p.buyNetWorth),
+          data: points.map((p) => ({ x: p.year, y: p.buyNetWorth })),
           borderColor: colors.buy,
           backgroundColor: colors.buy,
           borderWidth: 2.5,
@@ -69,7 +105,7 @@ const BuyVsRentChart = ({ points, crossoverYear }: Props) => {
         },
         {
           label: "Patrimoine si location",
-          data: points.map((p) => p.rentNetWorth),
+          data: points.map((p) => ({ x: p.year, y: p.rentNetWorth })),
           borderColor: colors.rent,
           backgroundColor: colors.rent,
           borderWidth: 2.5,
@@ -80,6 +116,11 @@ const BuyVsRentChart = ({ points, crossoverYear }: Props) => {
       ],
     }),
     [points, colors],
+  );
+
+  const crossoverPlugin = useMemo(
+    () => createCrossoverLinePlugin(crossoverMonth),
+    [crossoverMonth],
   );
 
   const options = useMemo(
@@ -99,6 +140,10 @@ const BuyVsRentChart = ({ points, crossoverYear }: Props) => {
         tooltip: {
           backgroundColor: colors.tooltipBg,
           callbacks: {
+            title: (items: TooltipItem<"line">[]) => {
+              const year = items[0]?.parsed.x;
+              return year !== undefined ? `An ${Math.round(Number(year))}` : "";
+            },
             label: (ctx: TooltipItem<"line">) =>
               `${ctx.dataset.label ?? ""} : ${formatCurrency(ctx.parsed.y ?? 0)}`,
           },
@@ -106,7 +151,14 @@ const BuyVsRentChart = ({ points, crossoverYear }: Props) => {
       },
       scales: {
         x: {
-          ticks: { color: colors.axisText, maxTicksLimit: 12 },
+          type: "linear" as const,
+          min: 0,
+          max: maxYear,
+          ticks: {
+            color: colors.axisText,
+            stepSize: maxYear <= 15 ? 3 : 5,
+            callback: (value: string | number) => `An ${value}`,
+          },
           grid: { display: false },
         },
         y: {
@@ -118,22 +170,36 @@ const BuyVsRentChart = ({ points, crossoverYear }: Props) => {
         },
       },
     }),
-    [colors],
+    [colors, maxYear],
   );
 
+  const crossoverLabel =
+    crossoverMonth !== null
+      ? formatDurationYearsMonths(crossoverMonth)
+      : null;
+
   const description =
-    crossoverYear !== null
-      ? `Les courbes se croisent vers l’année ${crossoverYear} : au-delà, l’achat affiche un patrimoine net plus élevé avec ces hypothèses.`
+    crossoverLabel !== null
+      ? `Les courbes se croisent vers ${crossoverLabel} : au-delà, l’achat affiche un patrimoine net plus élevé avec ces hypothèses.`
       : "Sur l’horizon choisi, les courbes ne se croisent pas : une option reste nettement devant selon les hypothèses.";
+
+  const chartAriaLabel =
+    crossoverLabel !== null
+      ? `Graphique comparant le patrimoine net en cas d’achat ou de location. Croisement des courbes vers ${crossoverLabel}.`
+      : "Graphique comparant le patrimoine net en cas d’achat ou de location.";
 
   return (
     <Card title="Patrimoine net dans le temps" description={description}>
       <div
         className="h-80 min-h-[16rem] w-full"
         role="img"
-        aria-label="Graphique comparant le patrimoine net en cas d’achat ou de location"
+        aria-label={chartAriaLabel}
       >
-        <Line data={chartData} options={options} />
+        <Line
+          data={chartData}
+          options={options}
+          plugins={[crossoverPlugin]}
+        />
       </div>
     </Card>
   );
